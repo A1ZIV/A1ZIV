@@ -1360,7 +1360,16 @@ function parseWords(text) {
       const parts = line.split(divider);
       const word = String(parts[0] || "").trim();
       const meaning = parts.slice(1).join(" — ").trim();
-      return { word, meaning, sentence: `Use the word correctly: _____.`, topic: "Custom", level: "Custom", tr: {} };
+      return {
+        word,
+        meaning,
+        sentence: meaning
+          ? `In this vocabulary set, _____ means: ${meaning}.`
+          : `Use the word correctly: _____.`,
+        topic: "Custom",
+        level: "Custom",
+        tr: {}
+      };
     })
     .filter((item) => item.word.length > 0);
 }
@@ -1416,6 +1425,24 @@ function wordList(words, langCode) {
   const lines = [`VOCABULARY LIST: ENGLISH — ${lang.name}`, ""];
   words.forEach((item, index) => lines.push(`${index + 1}. ${item.word} — ${translationOf(item, langCode)}`));
   return lines.join(NL);
+}
+
+function learningPath() {
+  return [
+    "LEARNING SEQUENCE",
+    "1. Study the vocabulary list first.",
+    "2. Check meaning recognition.",
+    "3. Practise the words in context.",
+    "4. Use the words in speaking or writing.",
+    "5. Test yourself and check your score.",
+    ""
+  ].join(NL);
+}
+
+function exampleSentence(item) {
+  const sentence = item.sentence || "Use the word correctly: _____.";
+  if (sentence.includes("_____")) return sentence.replace("_____", item.word);
+  return `${item.word}: ${sentence}`;
 }
 
 function matchMeanings(words, langCode, showAnswers = true) {
@@ -1509,16 +1536,18 @@ function readyDialogue(words, level) {
     "READY DIALOGUE",
     `Scenario: ${dialogueScenario(level)}`,
     "",
-    "A: We need to talk about this situation carefully. It may affect the whole project.",
-    `B: I agree. The first problem is ${selected[0]?.word || "the main issue"}, and we cannot ignore it.`,
-    `A: Yes, but we also need a clear ${selected[1]?.word || "plan"} before we make a decision.`,
-    `B: True. If we make an ${selected[2]?.word || "assumption"} too quickly, we may choose the wrong solution.`,
-    `A: That is why I want us to ${selected[3]?.word || "evaluate"} the facts first.`,
-    `B: Good point. The details are quite ${selected[4]?.word || "important"}, so we should not rush.`,
-    `A: Also, ${selected[5]?.word || "communication"} with the other team will be important.`,
-    `B: Exactly. We need to ${selected[6]?.word || "negotiate"} calmly and explain our position clearly.`,
-    `A: If we do that, we can avoid a serious ${selected[7]?.word || "problem"}.`,
-    `B: I agree. Let's prepare our ideas and then speak to them tomorrow.`
+    "A: Before we start, let's review the vocabulary and use it in real context.",
+    `B: Good idea. The first useful word is ${selected[0]?.word || "important"}: ${translationOf(selected[0] || { meaning: "important" }, "ru")}.`,
+    `A: My example is: ${selected[0] ? exampleSentence(selected[0]) : "This word is useful in many situations."}`,
+    `B: Another word we need is ${selected[1]?.word || "plan"}.`,
+    `A: Right. For example: ${selected[1] ? exampleSentence(selected[1]) : "We should make a clear plan."}`,
+    `B: I also want to practise ${selected[2]?.word || "communication"}, because it is easy to forget in speech.`,
+    `A: Then let's make one more sentence: ${selected[2] ? exampleSentence(selected[2]) : "Communication helps people work together."}`,
+    `B: What about ${selected[3]?.word || "decision"}? Can you use it naturally?`,
+    `A: Yes: ${selected[3] ? exampleSentence(selected[3]) : "We need to make a good decision."}`,
+    `B: Great. Now we should use ${selected[4]?.word || "the last word"} in a longer answer.`,
+    `A: Example: ${selected[4] ? exampleSentence(selected[4]) : "The last word should appear in a natural sentence."}`,
+    "B: Perfect. Now the vocabulary is not just a list; it is connected to examples and practice."
   ];
   return lines.join(NL);
 }
@@ -1528,17 +1557,12 @@ function gappedDialogue(words, level, showAnswers = true) {
   const lines = [
     "DIALOGUE EXERCISE: Fill in the missing words.",
     "Use the vocabulary list before the dialogue.",
-    "",
-    "A: We need to talk about this situation carefully. It may affect the whole project.",
-    "B: I agree. The first problem is _____, and we cannot ignore it.",
-    "A: Yes, but we also need a clear _____ before we make a decision.",
-    "B: True. If we make an _____ too quickly, we may choose the wrong solution.",
-    "A: That is why I want us to _____ the facts first.",
-    "B: Good point. The details are quite _____, so we should not rush.",
-    "A: Also, _____ with the other team will be important.",
-    "B: Exactly. We need to _____ calmly and explain our position clearly.",
-    "A: If we do that, we can avoid a serious _____."
+    ""
   ];
+  selected.forEach((item, index) => {
+    const sentence = exampleSentence(item).replace(new RegExp(item.word.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "gi"), "_____");
+    lines.push(`${index + 1}. ${sentence}`);
+  });
   if (showAnswers) {
     lines.push("", "Answer Key:");
     selected.forEach((item, index) => lines.push(`${index + 1}. ${item.word}`));
@@ -1708,9 +1732,157 @@ function mixedChallenge(words, langCode, showAnswers = true) {
   return parts.join(NL);
 }
 
+
+function levelParagraphCount(level) {
+  if (level === "A1" || level === "A2") return 2;
+  if (level === "B1" || level === "B2") return 3;
+  return 4;
+}
+
+function readingTitle(level) {
+  if (level === "A1") return "A Simple Day";
+  if (level === "A2") return "A Useful School Project";
+  if (level === "B1") return "Learning New Skills";
+  if (level === "B2") return "Making Better Decisions";
+  if (level === "C1") return "How People Evaluate Complex Choices";
+  return "The Subtle Art of Strategic Thinking";
+}
+
+function buildReadingText(words, level) {
+  const selected = words.slice(0, Math.min(words.length, 10));
+  const paragraphs = [];
+  const title = readingTitle(level);
+  const simple = level === "A1" || level === "A2";
+  const medium = level === "B1" || level === "B2";
+  const count = levelParagraphCount(level);
+
+  for (let i = 0; i < count; i += 1) {
+    const a = selected[(i * 3) % selected.length]?.word || "skill";
+    const b = selected[(i * 3 + 1) % selected.length]?.word || "decision";
+    const c = selected[(i * 3 + 2) % selected.length]?.word || "experience";
+    if (simple) {
+      paragraphs.push(`Paragraph ${i + 1}. This text is about ${a}, ${b}, and ${c}. The student sees the words in a clear situation. The story is short, so it is easy to read and understand. Each word helps the student remember the meaning and use it in a sentence.`);
+    } else if (medium) {
+      paragraphs.push(`Paragraph ${i + 1}. During the project, the learners had to think carefully about ${a}. At first, they did not fully understand how ${b} could affect the result. After a short discussion, they connected the idea with their own ${c} and became more confident using the vocabulary in context.`);
+    } else {
+      paragraphs.push(`Paragraph ${i + 1}. The discussion revealed that ${a} was not merely an isolated term, but part of a wider conceptual pattern. When the group examined ${b}, they noticed how easily a superficial interpretation could distort the final judgement. By connecting the concept to ${c}, they developed a more precise and defensible understanding of the topic.`);
+    }
+  }
+
+  return [`READING TEXT: ${title}`, "", ...paragraphs].join(NL + NL);
+}
+
+function readingPractice(words, level, langCode, exerciseType, showAnswers = true) {
+  const lines = ["READING PRACTICE", "", `Level focus: ${level}.`, "", buildReadingText(words, level), "", "READING TASKS", ""];
+  lines.push("Task 1. Read the text and answer the questions.", "");
+  lines.push("1. What is the main topic of the text?");
+  lines.push("2. Which target words appear in the text?");
+  lines.push("3. Why are the words useful for learning English?");
+  lines.push("4. Choose two target words and explain their meaning from context.");
+  lines.push("5. Write one sentence that summarises the text.", "");
+
+  if (exerciseType === "gap") lines.push(fillGaps(words.slice(0, 8), showAnswers));
+  else if (exerciseType === "choose") lines.push(multipleChoice(words.slice(0, 8), langCode, showAnswers));
+  else if (exerciseType === "match") lines.push(matchMeanings(words.slice(0, 8), langCode, showAnswers));
+  else if (exerciseType === "intoEnglish") lines.push(translateIntoEnglish(words.slice(0, 8), langCode, showAnswers));
+  else if (exerciseType === "fromEnglish") lines.push(translateFromEnglish(words.slice(0, 8), langCode, showAnswers));
+  else if (exerciseType === "definitions") lines.push(definitionPractice(words.slice(0, 8), langCode, showAnswers));
+  else if (exerciseType === "questions") lines.push(questionPractice(words.slice(0, 8), level));
+  else lines.push("Task 2. Vocabulary in context.", "", mixedChallenge(words.slice(0, 10), langCode, showAnswers));
+
+  if (showAnswers) {
+    lines.push("", "Suggested Reading Answer Key:");
+    lines.push("1. The text is about learning and using the target vocabulary in context.");
+    lines.push("2. Answers depend on the generated word list.");
+    lines.push("3. The words are useful because they are connected to examples, not memorised alone.");
+    lines.push("4–5. Teacher check: accept logical answers supported by the text.");
+  }
+  return lines.join(NL);
+}
+
+function grammarFocusForLevel(level) {
+  if (level === "A1") return "Present Simple and basic sentence order";
+  if (level === "A2") return "Past Simple, comparatives, and basic question forms";
+  if (level === "B1") return "Present Perfect, modals, and conditionals";
+  if (level === "B2") return "passive voice, relative clauses, and complex sentences";
+  if (level === "C1") return "inversion, nominalisation, and advanced linking";
+  return "cleft sentences, advanced modality, and subtle register shifts";
+}
+
+function grammarPractice(words, level, langCode, showAnswers = true) {
+  const focus = grammarFocusForLevel(level);
+  const lines = ["GRAMMAR PRACTICE", "", `Level focus: ${level}.`, `Grammar focus: ${focus}.`, "", "Mini explanation:"];
+  lines.push(`Use the target vocabulary while practising ${focus}. The aim is not only to know the words, but to use them inside accurate sentences.`);
+  lines.push("", "Task 1. Complete the sentences with the correct word and correct grammar form.", "");
+  words.slice(0, 8).forEach((item, index) => {
+    lines.push(`${index + 1}. If students practise ${translationOf(item, langCode)}, they can use \"${item.word}\" more accurately: ______________________________.`);
+  });
+  lines.push("", "Task 2. Correct the grammar mistakes.", "");
+  words.slice(0, 6).forEach((item, index) => {
+    lines.push(`${index + 1}. He don't understand the word ${item.word}. → ______________________________`);
+  });
+  lines.push("", "Task 3. Make one advanced sentence with each word.", "");
+  words.slice(0, 6).forEach((item, index) => lines.push(`${index + 1}. ${item.word}: ________________________________________________________________`));
+  if (showAnswers) {
+    lines.push("", "Suggested Answer Key:");
+    lines.push("Task 1: teacher checks that the sentence uses the word naturally and follows the grammar focus.");
+    lines.push("Task 2 example: He doesn't understand the word. / He did not understand the word.");
+    lines.push("Task 3: accept accurate sentences using the target word correctly.");
+  }
+  return lines.join(NL);
+}
+
+function listeningPractice(words, level, langCode, showAnswers = true) {
+  const lines = ["LISTENING PRACTICE", "", `Level focus: ${level}.`, "", "Teacher script / audio script:", ""];
+  lines.push(buildReadingText(words, level));
+  lines.push("", "Listening tasks:", "");
+  lines.push("1. Listen once and write the general topic.");
+  lines.push("2. Listen again and write five target words you hear.");
+  lines.push("3. Match the words to their meanings.");
+  lines.push("4. Complete the missing information from the script.", "");
+  lines.push(matchMeanings(words.slice(0, 8), langCode, showAnswers));
+  if (showAnswers) lines.push("", "Listening answer key: use the script above to check students' answers.");
+  return lines.join(NL);
+}
+
+function writingPractice(words, level, langCode, showAnswers = true) {
+  const selected = words.slice(0, 10).map((item) => item.word).join(" – ");
+  const lines = ["WRITING PRACTICE", "", `Level focus: ${level}.`, "", "Use the target vocabulary in a structured written answer.", ""];
+  lines.push(`Required words: ${selected}`);
+  lines.push("", "Task 1. Write a short paragraph using at least 5 target words.");
+  lines.push("________________________________________________________________");
+  lines.push("________________________________________________________________");
+  lines.push("", "Task 2. Write a longer answer using at least 8 target words.");
+  if (level === "A1" || level === "A2") lines.push("Topic: Describe your day or school life.");
+  else if (level === "B1" || level === "B2") lines.push("Topic: Describe a problem, a decision, and the result.");
+  else lines.push("Topic: Analyse a complex situation and explain your reasoning.");
+  lines.push("________________________________________________________________");
+  lines.push("________________________________________________________________");
+  lines.push("________________________________________________________________");
+  if (showAnswers) lines.push("", "Teacher check: mark vocabulary accuracy, grammar accuracy, structure, and natural word use.");
+  return lines.join(NL);
+}
+
+function useOfEnglishPractice(words, level, langCode, showAnswers = true) {
+  const lines = ["USE OF ENGLISH PRACTICE", "", `Level focus: ${level}.`, "", "Task 1. Word formation", ""];
+  lines.push(wordFormation(words.slice(0, 8), showAnswers));
+  lines.push("", "Task 2. Sentence transformation", "");
+  lines.push(sentenceTransformation(words.slice(0, 8), langCode, showAnswers));
+  lines.push("", "Task 3. Collocations", "");
+  lines.push(collocationPractice(words.slice(0, 8), showAnswers));
+  return lines.join(NL);
+}
+
+function htmlDocument(text, title) {
+  const safeTitle = String(title || "Vocabulary Practice Workbook").replace(/[<>&]/g, "");
+  const safeText = String(text || "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  return `<!doctype html><html><head><meta charset="UTF-8"><title>${safeTitle}</title><style>body{font-family:Arial,sans-serif;line-height:1.55;padding:40px;max-width:900px;margin:auto;color:#111}pre{white-space:pre-wrap;font-family:Arial,sans-serif}</style></head><body><pre>${safeText}</pre></body></html>`;
+}
+
 function fullWorkbook(words, settings) {
   const parts = [
     header(settings),
+    learningPath(),
     wordList(words, settings.targetLanguage),
     "",
     matchMeanings(words, settings.targetLanguage, settings.showAnswers),
@@ -1751,8 +1923,13 @@ function fullWorkbook(words, settings) {
 
 function buildWorksheet(words, settings) {
   if (!words.length) return "No words found. Choose automatic mode or paste words like: confident — уверенный";
-  if (settings.format === "dialogue") return header(settings) + wordList(words, settings.targetLanguage) + NL + NL + dialoguePractice(words, settings.level, settings.targetLanguage, settings.exerciseType, settings.showAnswers);
-  if (settings.format === "speaking") return header(settings) + wordList(words, settings.targetLanguage) + NL + NL + speakingPractice(words, settings.level);
+  if (settings.format === "dialogue") return header(settings) + learningPath() + wordList(words, settings.targetLanguage) + NL + NL + dialoguePractice(words, settings.level, settings.targetLanguage, settings.exerciseType, settings.showAnswers);
+  if (settings.format === "speaking") return header(settings) + learningPath() + wordList(words, settings.targetLanguage) + NL + NL + speakingPractice(words, settings.level);
+  if (settings.format === "reading") return header(settings) + learningPath() + wordList(words, settings.targetLanguage) + NL + NL + readingPractice(words, settings.level, settings.targetLanguage, settings.exerciseType, settings.showAnswers);
+  if (settings.format === "grammar") return header(settings) + learningPath() + wordList(words, settings.targetLanguage) + NL + NL + grammarPractice(words, settings.level, settings.targetLanguage, settings.showAnswers);
+  if (settings.format === "listening") return header(settings) + learningPath() + wordList(words, settings.targetLanguage) + NL + NL + listeningPractice(words, settings.level, settings.targetLanguage, settings.showAnswers);
+  if (settings.format === "writing") return header(settings) + learningPath() + wordList(words, settings.targetLanguage) + NL + NL + writingPractice(words, settings.level, settings.targetLanguage, settings.showAnswers);
+  if (settings.format === "useOfEnglish") return header(settings) + learningPath() + wordList(words, settings.targetLanguage) + NL + NL + useOfEnglishPractice(words, settings.level, settings.targetLanguage, settings.showAnswers);
 
   const map = {
     wordlist: () => wordList(words, settings.targetLanguage),
@@ -1774,7 +1951,7 @@ function buildWorksheet(words, settings) {
     full: () => fullWorkbook(words, settings)
   };
   if (settings.exerciseType === "full") return map.full();
-  return [header(settings), wordList(words, settings.targetLanguage), "", (map[settings.exerciseType] || map.full)()].join(NL);
+  return [header(settings), learningPath(), wordList(words, settings.targetLanguage), "", (map[settings.exerciseType] || map.full)()].join(NL);
 }
 
 function normalizeAnswer(value) {
@@ -1818,18 +1995,20 @@ function App() {
   const [targetLanguage, setTargetLanguage] = useState("ru");
   const [topic, setTopic] = useState("Any topic");
   const [wordCount, setWordCount] = useState(10);
+  const [generationSeed, setGenerationSeed] = useState(1);
   const [showAnswers, setShowAnswers] = useState(true);
   const [output, setOutput] = useState("");
   const [copied, setCopied] = useState(false);
+  const [downloadFormat, setDownloadFormat] = useState("txt");
   const [testSeed, setTestSeed] = useState(1);
   const [answers, setAnswers] = useState({});
   const [testChecked, setTestChecked] = useState(false);
 
   const customWords = useMemo(() => parseWords(input), [input]);
-  const autoWords = useMemo(() => pickAutoWords(level, topic, Number(wordCount) || 10), [level, topic, wordCount]);
+  const autoWords = useMemo(() => pickAutoWords(level, topic, Number(wordCount) || 10), [level, topic, wordCount, generationSeed]);
   const words = autoMode ? autoWords : customWords;
   const settings = { title, level, format, targetLanguage, exerciseType, autoMode, showAnswers };
-  const generatedText = output || buildWorksheet(words, settings);
+  const generatedText = buildWorksheet(words, settings);
   const levelTopics = level === "Mixed" ? WORD_BANK : WORD_BANK.filter((item) => item.level === level);
   const topics = ["Any topic", ...Array.from(new Set(levelTopics.map((item) => item.topic))).sort()];
   const selectedLang = languageByCode(targetLanguage);
@@ -1837,7 +2016,8 @@ function App() {
   const score = testQuestions.reduce((total, question) => total + (answerIsCorrect(answers[question.id], question.expected) ? 1 : 0), 0);
 
   function handleGenerate() {
-    setOutput(buildWorksheet(words, settings));
+    setOutput("");
+    setGenerationSeed((seed) => seed + 1);
   }
 
   function handleGenerateTest() {
@@ -1862,16 +2042,49 @@ function App() {
     }
   }
 
-  function handleDownload() {
-    const blob = new Blob([generatedText], { type: "text/plain;charset=utf-8" });
+  function downloadBlob(content, name, type) {
+    const blob = new Blob([content], { type });
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.href = url;
-    link.download = fileName(title);
+    link.download = name;
     document.body.appendChild(link);
     link.click();
     link.remove();
     URL.revokeObjectURL(url);
+  }
+
+  function handleDownload() {
+    if (downloadFormat === "html") {
+      downloadBlob(htmlDocument(generatedText, title), fileName(title).replace(/\.txt$/, ".html"), "text/html;charset=utf-8");
+      return;
+    }
+    downloadBlob(generatedText, fileName(title), "text/plain;charset=utf-8");
+  }
+
+  async function handleSaveAs() {
+    const isHtml = downloadFormat === "html";
+    const content = isHtml ? htmlDocument(generatedText, title) : generatedText;
+    const suggestedName = isHtml ? fileName(title).replace(/\.txt$/, ".html") : fileName(title);
+    const mime = isHtml ? "text/html" : "text/plain";
+
+    if (window.showSaveFilePicker) {
+      try {
+        const handle = await window.showSaveFilePicker({
+          suggestedName,
+          types: [{ description: isHtml ? "HTML file" : "Text file", accept: { [mime]: [isHtml ? ".html" : ".txt"] } }]
+        });
+        const writable = await handle.createWritable();
+        await writable.write(content);
+        await writable.close();
+        return;
+      } catch (error) {
+        if (error && error.name === "AbortError") return;
+      }
+    }
+
+    alert("Your browser does not allow websites to choose a folder directly. The file will be saved to your default Downloads folder, or your browser will ask where to save it if that setting is enabled.");
+    downloadBlob(content, suggestedName, `${mime};charset=utf-8`);
   }
 
   function updateAnswer(id, value) {
@@ -1882,11 +2095,11 @@ function App() {
     <div className="min-h-screen p-4 md:p-8">
       <div className="mx-auto max-w-7xl space-y-6">
         <header className="rounded-3xl border p-6 shadow-sm md:p-8">
-          <p className="mb-2 text-sm font-semibold">AI-style worksheet and test generator without API</p>
+          <p className="mb-2 text-sm font-semibold">AI-style worksheet, reading, grammar, and test generator without API</p>
           <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
             <div>
               <h1>Vocabulary Exercise Generator</h1>
-              <p className="mt-3 max-w-3xl">Generate worksheets with a vocabulary list first, or create a real interactive test that checks answers and gives a score.</p>
+              <p className="mt-3 max-w-3xl">Generate vocabulary worksheets, dialogues, readings, grammar tasks, writing tasks, listening scripts, or a real interactive test that checks answers and gives a score.</p>
             </div>
             <div className="flex flex-wrap gap-2">
               <button onClick={() => setActiveTab("worksheet")}>Generate worksheet</button>
@@ -1916,7 +2129,15 @@ function App() {
               <div>
                 <label>Format</label>
                 <select value={format} onChange={(event) => setFormat(event.target.value)}>
-                  <option value="worksheet">worksheet</option><option value="test">paper test</option><option value="dialogue">dialogue</option><option value="speaking">speaking practice</option>
+                  <option value="worksheet">worksheet</option>
+                  <option value="test">paper test</option>
+                  <option value="dialogue">dialogue</option>
+                  <option value="speaking">speaking practice</option>
+                  <option value="reading">reading</option>
+                  <option value="grammar">grammar</option>
+                  <option value="listening">listening script</option>
+                  <option value="writing">writing practice</option>
+                  <option value="useOfEnglish">use of English</option>
                 </select>
               </div>
             </div>
@@ -1963,7 +2184,7 @@ function App() {
               <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
                 <div>
                   <strong>Edit words</strong>
-                  <p className="text-sm">Click this to turn the generated vocabulary into an editable list. Then you can write your own words.</p>
+                  <p className="text-sm">Click this to turn the generated vocabulary into an editable list. When you change the words, the worksheet, dialogue, and test update automatically.</p>
                 </div>
                 <button onClick={handleEditWords}>Edit current words</button>
               </div>
@@ -2012,7 +2233,10 @@ function App() {
                 <div className="flex flex-wrap gap-2">
                   <button onClick={handleGenerate}>Regenerate</button>
                   <button onClick={handleCopy}>{copied ? "Copied" : "Copy"}</button>
-                  <button onClick={handleDownload}>Download</button>
+                  <select value={downloadFormat} onChange={(event) => setDownloadFormat(event.target.value)} className="w-auto min-w-[110px]"><option value="txt">TXT</option><option value="html">HTML</option></select>
+              <button onClick={handleDownload}>Download</button>
+                  <button onClick={handleSaveAs}>Save as...</button>
+              <button onClick={handleSaveAs}>Choose where to save</button>
                 </div>
               </div>
               <pre className="h-[680px] overflow-auto whitespace-pre-wrap rounded-2xl border p-5 text-sm leading-6">{generatedText}</pre>
