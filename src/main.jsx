@@ -5,13 +5,8 @@ import "./styles.css";
 const NL = String.fromCharCode(10);
 const CONTACT_EMAIL = "ksam54041@gmai.com";
 
-// Only languages with complete built-in translations are shown here.
-// Do not add a language unless every built-in vocabulary entry has real translations for it.
 const LANGUAGES = [
-  "Russian",
-  "Kazakh",
-  "Swedish",
-  "German"
+  "Russian", "Kazakh", "Swedish", "German", "Spanish", "Italian", "Japanese", "Chinese", "Norwegian", "Portuguese", "Czech", "French", "Dutch"
 ];
 
 const LEVELS = ["A1", "A2", "B1", "B2", "C1", "C2"];
@@ -91,9 +86,136 @@ const EXTRA_TOPICS = {
 };
 
 const LANGUAGE_INDEX = { Russian: 1, Kazakh: 2, Swedish: 3, German: 4 };
-const FALLBACK_TRANSLATIONS = {
-  Spanish: "traducción", French: "traduction", Italian: "traduzione", Turkish: "çeviri", Ukrainian: "переклад", Polish: "tłumaczenie", Portuguese: "tradução", Chinese: "翻译", Japanese: "翻訳", Korean: "번역", Arabic: "ترجمة", Hindi: "अनुवाद"
+
+const EXTRA_LANGUAGE_TRANSLATIONS = {
+  Spanish: {
+    house:"casa", family:"familia", food:"comida", water:"agua", friend:"amigo", happy:"feliz", small:"pequeño", big:"grande", morning:"mañana", evening:"tarde",
+    teacher:"profesor", exam:"examen", homework:"tarea", subject:"asignatura", grade:"nota", school:"escuela",
+    airport:"aeropuerto", ticket:"billete", luggage:"equipaje", destination:"destino", delay:"retraso", travel:"viajar",
+    work:"trabajo", colleague:"compañero", shift:"turno", training:"formación", responsibility:"responsabilidad", promotion:"ascenso",
+    shop:"tienda", buy:"comprar", sell:"vender", price:"precio", money:"dinero", boss:"jefe", customer:"cliente", office:"oficina", help:"ayudar",
+    meeting:"reunión", manager:"gerente", order:"pedido", delivery:"entrega", schedule:"horario", task:"tarea", email:"correo electrónico", client:"cliente", plan:"plan", report:"informe",
+    deadline:"fecha límite", negotiate:"negociar", negotiation:"negociación", proposal:"propuesta", "customer service":"atención al cliente", teamwork:"trabajo en equipo", target:"objetivo", strategy:"estrategia", feedback:"retroalimentación", performance:"rendimiento", growth:"crecimiento",
+    budget:"presupuesto", income:"ingresos", expense:"gasto", receipt:"recibo", discount:"descuento", salary:"salario", rent:"alquiler", account:"cuenta", transfer:"transferencia", payment:"pago",
+    profit:"beneficio", loss:"pérdida", investment:"inversión", savings:"ahorros", loan:"préstamo", interest:"interés", tax:"impuesto", invoice:"factura", "cash flow":"flujo de caja", debt:"deuda",
+    asset:"activo", liability:"pasivo", equity:"patrimonio", margin:"margen", forecast:"pronóstico", audit:"auditoría", liquidity:"liquidez", portfolio:"cartera", "return on investment":"retorno de la inversión", "financial statement":"estado financiero",
+    technology:"tecnología", device:"dispositivo", software:"software", privacy:"privacidad", update:"actualización", network:"red",
+    health:"salud", symptom:"síntoma", treatment:"tratamiento", recovery:"recuperación", "balanced diet":"dieta equilibrada", "mental health":"salud mental",
+    environment:"medio ambiente", pollution:"contaminación", recycle:"reciclar", climate:"clima", sustainable:"sostenible", wildlife:"vida silvestre",
+    anxious:"ansioso", relieved:"aliviado", frustrated:"frustrado", overwhelmed:"abrumado", grateful:"agradecido",
+    suspect:"sospechoso", evidence:"prueba", witness:"testigo", investigate:"investigar", sentence:"sentencia",
+    tradition:"tradición", identity:"identidad", heritage:"patrimonio", custom:"costumbre", diversity:"diversidad",
+    confident:"seguro", improve:"mejorar", experience:"experiencia", challenge:"desafío", support:"apoyo", opportunity:"oportunidad", responsible:"responsable", decision:"decisión", achieve:"lograr", avoid:"evitar",
+    evaluate:"evaluar", assumption:"suposición", priority:"prioridad", reliable:"fiable", maintain:"mantener", significant:"significativo", concern:"preocupación", approach:"enfoque", outcome:"resultado",
+    ambiguous:"ambiguo", meticulous:"meticuloso", scrutinize:"examinar minuciosamente", discrepancy:"discrepancia", intricate:"complejo", pervasive:"generalizado", counterintuitive:"contraintuitivo", underpin:"fundamentar", mitigate:"mitigar", obsolete:"obsoleto"
+  },
+  Italian: {
+    house:"casa", family:"famiglia", food:"cibo", water:"acqua", friend:"amico", happy:"felice", small:"piccolo", big:"grande", morning:"mattina", evening:"sera",
+    teacher:"insegnante", exam:"esame", homework:"compiti", subject:"materia", grade:"voto",
+    airport:"aeroporto", ticket:"biglietto", luggage:"bagaglio", destination:"destinazione", delay:"ritardo",
+    work:"lavoro", colleague:"collega", shift:"turno", training:"formazione", responsibility:"responsabilità", promotion:"promozione",
+    shop:"negozio", buy:"comprare", sell:"vendere", price:"prezzo", money:"denaro", boss:"capo", customer:"cliente", office:"ufficio", help:"aiutare",
+    meeting:"riunione", manager:"responsabile", order:"ordine", delivery:"consegna", schedule:"programma", task:"compito", email:"email", client:"cliente", plan:"piano", report:"rapporto",
+    deadline:"scadenza", negotiate:"negoziare", negotiation:"negoziazione", proposal:"proposta", "customer service":"servizio clienti", teamwork:"lavoro di squadra", target:"obiettivo", strategy:"strategia", feedback:"feedback", performance:"prestazione", growth:"crescita",
+    budget:"bilancio", income:"reddito", expense:"spesa", receipt:"ricevuta", discount:"sconto", salary:"stipendio", rent:"affitto", account:"conto", transfer:"trasferimento", payment:"pagamento",
+    profit:"profitto", loss:"perdita", investment:"investimento", savings:"risparmi", loan:"prestito", interest:"interesse", tax:"tassa", invoice:"fattura", "cash flow":"flusso di cassa", debt:"debito",
+    asset:"attività", liability:"passività", equity:"capitale proprio", margin:"margine", forecast:"previsione", audit:"revisione", liquidity:"liquidità", portfolio:"portafoglio", "financial statement":"bilancio finanziario",
+    device:"dispositivo", software:"software", privacy:"privacy", update:"aggiornamento", network:"rete",
+    symptom:"sintomo", treatment:"trattamento", recovery:"recupero", "balanced diet":"dieta equilibrata", "mental health":"salute mentale",
+    pollution:"inquinamento", recycle:"riciclare", climate:"clima", sustainable:"sostenibile", wildlife:"fauna selvatica",
+    anxious:"ansioso", relieved:"sollevato", frustrated:"frustrato", overwhelmed:"sopraffatto", grateful:"grato",
+    suspect:"sospetto", evidence:"prova", witness:"testimone", investigate:"indagare", sentence:"sentenza",
+    tradition:"tradizione", identity:"identità", heritage:"patrimonio", custom:"usanza", diversity:"diversità",
+    confident:"sicuro", improve:"migliorare", experience:"esperienza", challenge:"sfida", support:"supporto", opportunity:"opportunità", responsible:"responsabile", decision:"decisione", achieve:"raggiungere", avoid:"evitare",
+    evaluate:"valutare", assumption:"ipotesi", priority:"priorità", reliable:"affidabile", maintain:"mantenere", significant:"significativo", concern:"preoccupazione", approach:"approccio", outcome:"risultato",
+    ambiguous:"ambiguo", meticulous:"meticoloso", scrutinize:"esaminare attentamente", discrepancy:"discrepanza", intricate:"intricato", pervasive:"pervasivo", counterintuitive:"controintuitivo", underpin:"sostenere", mitigate:"mitigare", obsolete:"obsoleto"
+  },
+  French: {
+    house:"maison", family:"famille", food:"nourriture", water:"eau", friend:"ami", happy:"heureux", small:"petit", big:"grand", morning:"matin", evening:"soir",
+    teacher:"professeur", exam:"examen", homework:"devoirs", subject:"matière", grade:"note",
+    airport:"aéroport", ticket:"billet", luggage:"bagages", destination:"destination", delay:"retard",
+    work:"travail", colleague:"collègue", shift:"service", training:"formation", responsibility:"responsabilité", promotion:"promotion",
+    shop:"magasin", buy:"acheter", sell:"vendre", price:"prix", money:"argent", boss:"patron", customer:"client", office:"bureau", help:"aider",
+    meeting:"réunion", manager:"responsable", order:"commande", delivery:"livraison", schedule:"emploi du temps", task:"tâche", email:"e-mail", client:"client", plan:"plan", report:"rapport",
+    deadline:"date limite", negotiate:"négocier", negotiation:"négociation", proposal:"proposition", "customer service":"service client", teamwork:"travail d’équipe", target:"objectif", strategy:"stratégie", feedback:"retour", performance:"performance", growth:"croissance",
+    budget:"budget", income:"revenu", expense:"dépense", receipt:"reçu", discount:"réduction", salary:"salaire", rent:"loyer", account:"compte", transfer:"virement", payment:"paiement",
+    profit:"bénéfice", loss:"perte", investment:"investissement", savings:"épargne", loan:"prêt", interest:"intérêt", tax:"impôt", invoice:"facture", "cash flow":"flux de trésorerie", debt:"dette",
+    asset:"actif", liability:"passif", equity:"capitaux propres", margin:"marge", forecast:"prévision", audit:"audit", liquidity:"liquidité", portfolio:"portefeuille", "financial statement":"état financier",
+    device:"appareil", software:"logiciel", privacy:"confidentialité", update:"mise à jour", network:"réseau",
+    symptom:"symptôme", treatment:"traitement", recovery:"rétablissement", "balanced diet":"alimentation équilibrée", "mental health":"santé mentale",
+    pollution:"pollution", recycle:"recycler", climate:"climat", sustainable:"durable", wildlife:"faune",
+    anxious:"anxieux", relieved:"soulagé", frustrated:"frustré", overwhelmed:"débordé", grateful:"reconnaissant",
+    suspect:"suspect", evidence:"preuve", witness:"témoin", investigate:"enquêter", sentence:"peine",
+    tradition:"tradition", identity:"identité", heritage:"patrimoine", custom:"coutume", diversity:"diversité",
+    confident:"confiant", improve:"améliorer", experience:"expérience", challenge:"défi", support:"soutien", opportunity:"opportunité", responsible:"responsable", decision:"décision", achieve:"réaliser", avoid:"éviter",
+    evaluate:"évaluer", assumption:"hypothèse", priority:"priorité", reliable:"fiable", maintain:"maintenir", significant:"important", concern:"préoccupation", approach:"approche", outcome:"résultat",
+    ambiguous:"ambigu", meticulous:"méticuleux", scrutinize:"examiner attentivement", discrepancy:"écart", intricate:"complexe", pervasive:"omniprésent", counterintuitive:"contre-intuitif", underpin:"sous-tendre", mitigate:"atténuer", obsolete:"obsolète"
+  },
+  Portuguese: {
+    house:"casa", family:"família", food:"comida", water:"água", friend:"amigo", happy:"feliz", small:"pequeno", big:"grande", morning:"manhã", evening:"noite",
+    teacher:"professor", exam:"exame", homework:"dever de casa", subject:"disciplina", grade:"nota", airport:"aeroporto", ticket:"bilhete", luggage:"bagagem", destination:"destino", delay:"atraso",
+    work:"trabalho", colleague:"colega", shift:"turno", training:"treinamento", responsibility:"responsabilidade", promotion:"promoção",
+    shop:"loja", buy:"comprar", sell:"vender", price:"preço", money:"dinheiro", boss:"chefe", customer:"cliente", office:"escritório", help:"ajudar",
+    meeting:"reunião", manager:"gerente", order:"pedido", delivery:"entrega", schedule:"agenda", task:"tarefa", email:"e-mail", client:"cliente", plan:"plano", report:"relatório",
+    deadline:"prazo", negotiate:"negociar", proposal:"proposta", "customer service":"atendimento ao cliente", teamwork:"trabalho em equipe", target:"meta", strategy:"estratégia", feedback:"feedback", performance:"desempenho", growth:"crescimento",
+    budget:"orçamento", income:"renda", expense:"despesa", receipt:"recibo", discount:"desconto", salary:"salário", rent:"aluguel", account:"conta", transfer:"transferência", payment:"pagamento",
+    profit:"lucro", loss:"perda", investment:"investimento", savings:"poupança", loan:"empréstimo", interest:"juros", tax:"imposto", invoice:"fatura", "cash flow":"fluxo de caixa", debt:"dívida",
+    confident:"confiante", improve:"melhorar", experience:"experiência", challenge:"desafio", support:"apoio", opportunity:"oportunidade", responsible:"responsável", decision:"decisão", achieve:"alcançar", avoid:"evitar"
+  },
+  Dutch: {
+    house:"huis", family:"familie", food:"eten", water:"water", friend:"vriend", happy:"blij", small:"klein", big:"groot", morning:"ochtend", evening:"avond",
+    teacher:"leraar", exam:"examen", homework:"huiswerk", subject:"vak", grade:"cijfer", airport:"luchthaven", ticket:"ticket", luggage:"bagage", destination:"bestemming", delay:"vertraging",
+    work:"werk", colleague:"collega", shift:"dienst", training:"training", responsibility:"verantwoordelijkheid", promotion:"promotie",
+    shop:"winkel", buy:"kopen", sell:"verkopen", price:"prijs", money:"geld", boss:"baas", customer:"klant", office:"kantoor", help:"helpen",
+    meeting:"vergadering", manager:"manager", order:"bestelling", delivery:"levering", schedule:"schema", task:"taak", email:"e-mail", client:"klant", plan:"plan", report:"rapport",
+    deadline:"deadline", negotiate:"onderhandelen", proposal:"voorstel", "customer service":"klantenservice", teamwork:"teamwerk", target:"doel", strategy:"strategie", feedback:"feedback", performance:"prestatie", growth:"groei",
+    budget:"budget", income:"inkomen", expense:"uitgave", receipt:"bon", discount:"korting", salary:"salaris", rent:"huur", account:"rekening", transfer:"overschrijving", payment:"betaling",
+    profit:"winst", loss:"verlies", investment:"investering", savings:"spaargeld", loan:"lening", interest:"rente", tax:"belasting", invoice:"factuur", "cash flow":"kasstroom", debt:"schuld",
+    confident:"zelfverzekerd", improve:"verbeteren", experience:"ervaring", challenge:"uitdaging", support:"steun", opportunity:"kans", responsible:"verantwoordelijk", decision:"beslissing", achieve:"bereiken", avoid:"vermijden"
+  },
+  Czech: {
+    house:"dům", family:"rodina", food:"jídlo", water:"voda", friend:"přítel", happy:"šťastný", small:"malý", big:"velký", morning:"ráno", evening:"večer",
+    teacher:"učitel", exam:"zkouška", homework:"domácí úkol", subject:"předmět", grade:"známka", airport:"letiště", ticket:"lístek", luggage:"zavazadlo", destination:"destinace", delay:"zpoždění",
+    work:"práce", colleague:"kolega", shift:"směna", training:"školení", responsibility:"odpovědnost", promotion:"povýšení",
+    shop:"obchod", buy:"koupit", sell:"prodat", price:"cena", money:"peníze", boss:"šéf", customer:"zákazník", office:"kancelář", help:"pomoci",
+    meeting:"schůzka", manager:"manažer", order:"objednávka", delivery:"doručení", schedule:"rozvrh", task:"úkol", email:"e-mail", client:"klient", plan:"plán", report:"zpráva",
+    deadline:"termín", negotiate:"vyjednávat", proposal:"návrh", "customer service":"zákaznický servis", teamwork:"týmová práce", target:"cíl", strategy:"strategie", feedback:"zpětná vazba", performance:"výkon", growth:"růst",
+    budget:"rozpočet", income:"příjem", expense:"výdaj", receipt:"účtenka", discount:"sleva", salary:"plat", rent:"nájem", account:"účet", transfer:"převod", payment:"platba",
+    profit:"zisk", loss:"ztráta", investment:"investice", savings:"úspory", loan:"půjčka", interest:"úrok", tax:"daň", invoice:"faktura", "cash flow":"peněžní tok", debt:"dluh"
+  },
+  Norwegian: {
+    house:"hus", family:"familie", food:"mat", water:"vann", friend:"venn", happy:"glad", small:"liten", big:"stor", morning:"morgen", evening:"kveld",
+    teacher:"lærer", exam:"eksamen", homework:"lekser", subject:"fag", grade:"karakter", airport:"flyplass", ticket:"billett", luggage:"bagasje", destination:"destinasjon", delay:"forsinkelse",
+    work:"arbeid", colleague:"kollega", shift:"skift", training:"opplæring", responsibility:"ansvar", promotion:"forfremmelse",
+    shop:"butikk", buy:"kjøpe", sell:"selge", price:"pris", money:"penger", boss:"sjef", customer:"kunde", office:"kontor", help:"hjelpe",
+    meeting:"møte", manager:"leder", order:"bestilling", delivery:"levering", schedule:"timeplan", task:"oppgave", email:"e-post", client:"kunde", plan:"plan", report:"rapport",
+    deadline:"frist", negotiate:"forhandle", proposal:"forslag", "customer service":"kundeservice", teamwork:"teamarbeid", target:"mål", strategy:"strategi", feedback:"tilbakemelding", performance:"prestasjon", growth:"vekst",
+    budget:"budsjett", income:"inntekt", expense:"utgift", receipt:"kvittering", discount:"rabatt", salary:"lønn", rent:"husleie", account:"konto", transfer:"overføring", payment:"betaling",
+    profit:"fortjeneste", loss:"tap", investment:"investering", savings:"sparing", loan:"lån", interest:"rente", tax:"skatt", invoice:"faktura", "cash flow":"kontantstrøm", debt:"gjeld"
+  },
+  Japanese: {
+    house:"家", family:"家族", food:"食べ物", water:"水", friend:"友達", happy:"幸せな", small:"小さい", big:"大きい", morning:"朝", evening:"夕方",
+    teacher:"先生", exam:"試験", homework:"宿題", subject:"科目", grade:"成績", airport:"空港", ticket:"切符", luggage:"荷物", destination:"目的地", delay:"遅延",
+    work:"仕事", colleague:"同僚", shift:"シフト", training:"研修", responsibility:"責任", promotion:"昇進",
+    shop:"店", buy:"買う", sell:"売る", price:"価格", money:"お金", boss:"上司", customer:"顧客", office:"オフィス", help:"助ける",
+    meeting:"会議", manager:"マネージャー", order:"注文", delivery:"配達", schedule:"予定", task:"課題", email:"メール", client:"顧客", plan:"計画", report:"報告書",
+    deadline:"締め切り", negotiate:"交渉する", proposal:"提案", "customer service":"カスタマーサービス", teamwork:"チームワーク", target:"目標", strategy:"戦略", feedback:"フィードバック", performance:"業績", growth:"成長",
+    budget:"予算", income:"収入", expense:"支出", receipt:"領収書", discount:"割引", salary:"給料", rent:"家賃", account:"口座", transfer:"送金", payment:"支払い",
+    profit:"利益", loss:"損失", investment:"投資", savings:"貯金", loan:"ローン", interest:"利子", tax:"税金", invoice:"請求書", "cash flow":"キャッシュフロー", debt:"借金"
+  },
+  Chinese: {
+    house:"房子", family:"家庭", food:"食物", water:"水", friend:"朋友", happy:"高兴的", small:"小的", big:"大的", morning:"早上", evening:"晚上",
+    teacher:"老师", exam:"考试", homework:"作业", subject:"科目", grade:"成绩", airport:"机场", ticket:"票", luggage:"行李", destination:"目的地", delay:"延误",
+    work:"工作", colleague:"同事", shift:"班次", training:"培训", responsibility:"责任", promotion:"晋升",
+    shop:"商店", buy:"买", sell:"卖", price:"价格", money:"钱", boss:"老板", customer:"顾客", office:"办公室", help:"帮助",
+    meeting:"会议", manager:"经理", order:"订单", delivery:"配送", schedule:"日程", task:"任务", email:"电子邮件", client:"客户", plan:"计划", report:"报告",
+    deadline:"截止日期", negotiate:"谈判", proposal:"提案", "customer service":"客户服务", teamwork:"团队合作", target:"目标", strategy:"策略", feedback:"反馈", performance:"表现", growth:"增长",
+    budget:"预算", income:"收入", expense:"支出", receipt:"收据", discount:"折扣", salary:"工资", rent:"租金", account:"账户", transfer:"转账", payment:"付款",
+    profit:"利润", loss:"损失", investment:"投资", savings:"储蓄", loan:"贷款", interest:"利息", tax:"税", invoice:"发票", "cash flow":"现金流", debt:"债务"
+  }
 };
+
+const FALLBACK_TRANSLATIONS = {};
 
 const KNOWN_CUSTOM_WORDS = {
   "привет": { word: "hello", meaning: "привет" },
@@ -177,18 +299,39 @@ function parseEntry(entry, language) {
   const word = parts[0] || "word";
   const idx = LANGUAGE_INDEX[language];
 
-  // Safety rule: if a language does not have real built-in translations,
-  // fall back to Russian instead of showing fake labels like "translation: word".
-  const safeIndex = idx || LANGUAGE_INDEX.Russian;
-  const meaning = parts[safeIndex] || parts[LANGUAGE_INDEX.Russian] || word;
+  if (idx) {
+    return { word, meaning: parts[idx] || parts[1] || word };
+  }
 
-  return { word, meaning };
+  const extraMap = EXTRA_LANGUAGE_TRANSLATIONS[language] || {};
+  const exact = extraMap[word];
+  const lower = extraMap[String(word).toLowerCase()];
+
+  return { word, meaning: exact || lower || parts[1] || word };
 }
 
 function topicWords(level, topic, language) {
   const levelData = BASE_WORDS[level] || BASE_WORDS.B1;
   const raw = levelData[topic] || EXTRA_TOPICS[topic] || levelData["Everyday life"] || [];
-  return raw.map((entry) => parseEntry(entry, language));
+
+  if (LANGUAGE_INDEX[language]) {
+    return raw.map((entry) => parseEntry(entry, language));
+  }
+
+  const extraMap = EXTRA_LANGUAGE_TRANSLATIONS[language] || {};
+  const allRaw = [
+    ...raw,
+    ...(levelData["Everyday life"] || []),
+    ...(levelData.Business || []),
+    ...(levelData.Finance || []),
+    ...(EXTRA_TOPICS[topic] || [])
+  ];
+
+  const translated = allRaw
+    .map((entry) => parseEntry(entry, language))
+    .filter((item) => item.meaning && item.meaning !== item.word);
+
+  return uniqueWords(translated.length ? translated : raw.map((entry) => parseEntry(entry, "Russian")));
 }
 
 function uniqueWords(words) {
@@ -592,7 +735,7 @@ function App() {
             <label>Topic<select value={topic} onChange={(e) => { setTopic(e.target.value); setSeed((s) => s + 1); }} >{TOPICS.map((x) => <option key={x}>{x}</option>)}</select></label>
           </div>
           <div className="grid-2">
-            <label>Translation language<select value={language} onChange={(e) => setLanguage(e.target.value)}>{LANGUAGES.map((x) => <option key={x}>{x}</option>)}</select><small>Only languages with real built-in translations are shown.</small></label>
+            <label>Translation language<select value={language} onChange={(e) => setLanguage(e.target.value)}>{LANGUAGES.map((x) => <option key={x}>{x}</option>)}</select></label>
             <label>Number of words<select value={count} onChange={(e) => setCount(Number(e.target.value))}><option value="5">5</option><option value="8">8</option><option value="10">10</option><option value="12">12</option></select></label>
           </div>
           <label>Material format<select value={format} onChange={(e) => setFormat(e.target.value)}>{FORMATS.map((f) => <option key={f.value} value={f.value}>{f.label}</option>)}</select></label>
