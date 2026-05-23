@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { createRoot } from "react-dom/client";
 import "./styles.css";
 
@@ -139,11 +139,13 @@ function parseCustomWords(text) {
 }
 
 function sentenceFor(word, level, topic) {
-  if (topic === "Finance") return `The finance team discussed how ${word} could affect the company's decision.`;
-  if (topic === "Business") return `During the meeting, the manager used ${word} to explain the next step.`;
-  if (level === "A1" || level === "A2") return `I can use the word '${word}' in a simple sentence.`;
-  if (level === "C1" || level === "C2") return `The speaker used ${word} to express a more precise and sophisticated idea.`;
-  return `The student used ${word} correctly in context.`;
+  const target = word || "_____";
+  if (topic === "Finance") return `The finance team discussed ${target} before making the final budget decision.`;
+  if (topic === "Business") return `During the meeting, the manager explained how ${target} could improve the project.`;
+  if (topic === "Technology") return `The team used ${target} to describe a new digital solution.`;
+  if (level === "A1" || level === "A2") return `I can use ${target} in a short everyday sentence.`;
+  if (level === "C1" || level === "C2") return `The speaker used ${target} to express a more precise and sophisticated idea.`;
+  return `The student used ${target} correctly in a clear context.`;
 }
 
 function header(title, level, topic, language, format) {
@@ -168,6 +170,11 @@ function vocabularyList(words) {
   return ["VOCABULARY LIST", "", ...words.map((item, i) => `${i + 1}. ${item.word} — ${item.meaning}`), ""].join(NL);
 }
 
+
+function wordsToEditableText(words) {
+  return words.map((item) => `${item.word} — ${item.meaning}`).join(NL);
+}
+
 function answerKey(words) {
   return ["ANSWER KEY", "", ...words.map((item, i) => `${i + 1}. ${item.word} — ${item.meaning}`)].join(NL);
 }
@@ -187,7 +194,9 @@ function matchTask(words, showAnswers) {
 
 function gapTask(words, level, topic, showAnswers) {
   const lines = ["EXERCISE. Fill in the gaps.", "", `Use the words: ${words.map((w) => w.word).join(" / ")}`, ""];
-  words.forEach((item, i) => lines.push(`${i + 1}. ${sentenceFor("_____", level, topic).replace("'_____'", "_____").replace("_____", "_____")}`));
+  words.forEach((item, i) => {
+    lines.push(`${i + 1}. ${sentenceFor("_____", level, topic)} (${item.meaning})`);
+  });
   if (showAnswers) lines.push("", "Answer Key:", ...words.map((item, i) => `${i + 1}. ${item.word}`));
   return lines.join(NL);
 }
@@ -198,7 +207,7 @@ function mcqTask(words, level, topic, showAnswers) {
   words.forEach((item, i) => {
     const options = shuffle([item.word, ...shuffle(words.filter((x) => x.word !== item.word)).slice(0, 3).map((x) => x.word)]);
     answers.push(`${i + 1}. ${String.fromCharCode(65 + options.indexOf(item.word))} — ${item.word}`);
-    lines.push(`${i + 1}. ${sentenceFor("_____", level, topic)}`);
+    lines.push(`${i + 1}. ${sentenceFor("_____", level, topic)} Meaning: ${item.meaning}`);
     options.forEach((op, idx) => lines.push(`${String.fromCharCode(65 + idx)}. ${op}`));
     lines.push("");
   });
@@ -432,6 +441,21 @@ function App() {
     await writable.close();
   }
 
+  function startEditingCurrentWords() {
+    setCustomText(wordsToEditableText(words));
+    setManual(true);
+  }
+
+  function useAutomaticWords() {
+    setManual(false);
+    setSeed((s) => s + 1);
+  }
+
+  useEffect(() => {
+    setAnswers({});
+    setChecked(false);
+  }, [studentText]);
+
   return (
     <div className="app-shell">
       <Hero onGenerateClick={() => setMode("worksheet")} onTestClick={() => setMode("test")} />
@@ -446,8 +470,8 @@ function App() {
           <h2>1. Choose material settings</h2>
           <label>Title<input value={title} onChange={(e) => setTitle(e.target.value)} /></label>
           <div className="grid-2">
-            <label>Level<select value={level} onChange={(e) => { setLevel(e.target.value); setSeed((s) => s + 1); }} disabled={manual}>{LEVELS.map((x) => <option key={x}>{x}</option>)}</select></label>
-            <label>Topic<select value={topic} onChange={(e) => { setTopic(e.target.value); setSeed((s) => s + 1); }} disabled={manual}>{TOPICS.map((x) => <option key={x}>{x}</option>)}</select></label>
+            <label>Level<select value={level} onChange={(e) => { setLevel(e.target.value); setSeed((s) => s + 1); }} >{LEVELS.map((x) => <option key={x}>{x}</option>)}</select></label>
+            <label>Topic<select value={topic} onChange={(e) => { setTopic(e.target.value); setSeed((s) => s + 1); }} >{TOPICS.map((x) => <option key={x}>{x}</option>)}</select></label>
           </div>
           <div className="grid-2">
             <label>Translation language<select value={language} onChange={(e) => setLanguage(e.target.value)}>{LANGUAGES.map((x) => <option key={x}>{x}</option>)}</select></label>
