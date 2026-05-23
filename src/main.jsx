@@ -41,25 +41,1302 @@ const LANGUAGES = [
 ];
 
 const WORD_BANK = [
-  { level: "A1", topic: "Daily life", word: "house", sentence: "My _____ is near the park.", tr: { ru: "дом", kk: "үй", sv: "hus", de: "Haus", es: "casa", fr: "maison", it: "casa", tr: "ev", uk: "дім", pl: "dom" } },
-  { level: "A1", topic: "Daily life", word: "family", sentence: "My _____ is very friendly.", tr: { ru: "семья", kk: "отбасы", sv: "familj", de: "Familie", es: "familia", fr: "famille", it: "famiglia", tr: "aile", uk: "сім'я", pl: "rodzina" } },
-  { level: "A1", topic: "Food", word: "water", sentence: "Can I have some _____, please?", tr: { ru: "вода", kk: "су", sv: "vatten", de: "Wasser", es: "agua", fr: "eau", it: "acqua", tr: "su", uk: "вода", pl: "woda" } },
-  { level: "A1", topic: "Food", word: "bread", sentence: "I eat _____ for breakfast.", tr: { ru: "хлеб", kk: "нан", sv: "bröd", de: "Brot", es: "pan", fr: "pain", it: "pane", tr: "ekmek", uk: "хліб", pl: "chleb" } },
-  { level: "A2", topic: "School", word: "homework", sentence: "I finished my _____ before dinner.", tr: { ru: "домашнее задание", kk: "үй тапсырмасы", sv: "läxa", de: "Hausaufgaben", es: "tarea", fr: "devoirs", it: "compiti", tr: "ödev", uk: "домашнє завдання", pl: "praca domowa" } },
-  { level: "A2", topic: "Travel", word: "ticket", sentence: "I bought a train _____.", tr: { ru: "билет", kk: "билет", sv: "biljett", de: "Ticket", es: "billete", fr: "billet", it: "biglietto", tr: "bilet", uk: "квиток", pl: "bilet" } },
-  { level: "A2", topic: "Health", word: "tired", sentence: "I am very _____ after school.", tr: { ru: "уставший", kk: "шаршаған", sv: "trött", de: "müde", es: "cansado", fr: "fatigué", it: "stanco", tr: "yorgun", uk: "втомлений", pl: "zmęczony" } },
-  { level: "B1", topic: "Emotions", word: "confident", sentence: "She feels _____ before the exam.", tr: { ru: "уверенный", kk: "сенімді", sv: "självsäker", de: "selbstbewusst", es: "seguro", fr: "confiant", it: "sicuro", tr: "kendinden emin", uk: "впевнений", pl: "pewny siebie" } },
-  { level: "B1", topic: "Work", word: "deadline", sentence: "The project _____ is Friday.", tr: { ru: "крайний срок", kk: "соңғы мерзім", sv: "deadline", de: "Frist", es: "fecha límite", fr: "date limite", it: "scadenza", tr: "son teslim tarihi", uk: "дедлайн", pl: "termin" } },
-  { level: "B1", topic: "Study", word: "improve", sentence: "I want to _____ my English.", tr: { ru: "улучшать", kk: "жақсарту", sv: "förbättra", de: "verbessern", es: "mejorar", fr: "améliorer", it: "migliorare", tr: "geliştirmek", uk: "покращувати", pl: "poprawić" } },
-  { level: "B2", topic: "Business", word: "negotiate", sentence: "The companies will _____ the price.", tr: { ru: "вести переговоры", kk: "келіссөз жүргізу", sv: "förhandla", de: "verhandeln", es: "negociar", fr: "négocier", it: "negoziare", tr: "müzakere etmek", uk: "вести переговори", pl: "negocjować" } },
-  { level: "B2", topic: "Technology", word: "privacy", sentence: "Online _____ is very important.", tr: { ru: "конфиденциальность", kk: "құпиялылық", sv: "integritet", de: "Datenschutz", es: "privacidad", fr: "confidentialité", it: "privacy", tr: "gizlilik", uk: "конфіденційність", pl: "prywatność" } },
-  { level: "B2", topic: "Society", word: "responsibility", sentence: "Everyone has a _____ to help.", tr: { ru: "ответственность", kk: "жауапкершілік", sv: "ansvar", de: "Verantwortung", es: "responsabilidad", fr: "responsabilité", it: "responsabilità", tr: "sorumluluk", uk: "відповідальність", pl: "odpowiedzialność" } },
-  { level: "C1", topic: "Academic", word: "assumption", sentence: "This argument is based on a weak _____.", tr: { ru: "предположение", kk: "болжам", sv: "antagande", de: "Annahme", es: "suposición", fr: "hypothèse", it: "ipotesi", tr: "varsayım", uk: "припущення", pl: "założenie" } },
-  { level: "C1", topic: "Academic", word: "evidence", sentence: "The claim needs stronger _____.", tr: { ru: "доказательства", kk: "дәлел", sv: "bevis", de: "Beweise", es: "evidencia", fr: "preuves", it: "prove", tr: "kanıt", uk: "докази", pl: "dowody" } },
-  { level: "C1", topic: "Business", word: "strategy", sentence: "The company changed its _____.", tr: { ru: "стратегия", kk: "стратегия", sv: "strategi", de: "Strategie", es: "estrategia", fr: "stratégie", it: "strategia", tr: "strateji", uk: "стратегія", pl: "strategia" } },
-  { level: "C2", topic: "Advanced", word: "ambiguous", sentence: "The instructions were _____ and confusing.", tr: { ru: "двусмысленный", kk: "екіұшты", sv: "tvetydig", de: "mehrdeutig", es: "ambiguo", fr: "ambigu", it: "ambiguo", tr: "belirsiz", uk: "двозначний", pl: "niejednoznaczny" } },
-  { level: "C2", topic: "Advanced", word: "subtle", sentence: "There was a _____ difference between the two ideas.", tr: { ru: "тонкий / едва заметный", kk: "нәзік / байқалмайтын", sv: "subtil", de: "subtil", es: "sutil", fr: "subtil", it: "sottile", tr: "ince", uk: "тонкий", pl: "subtelny" } },
-  { level: "C2", topic: "Advanced", word: "meticulous", sentence: "She is _____ when checking details.", tr: { ru: "дотошный", kk: "ұқыпты", sv: "noggrann", de: "akribisch", es: "meticuloso", fr: "méticuleux", it: "meticoloso", tr: "titiz", uk: "ретельний", pl: "skrupulatny" } }
+  {
+    "level": "A1",
+    "topic": "Daily life",
+    "word": "house",
+    "sentence": "My _____ is near the park.",
+    "tr": {
+      "ru": "дом",
+      "kk": "үй",
+      "sv": "hus",
+      "de": "Haus",
+      "es": "casa",
+      "fr": "maison",
+      "it": "casa",
+      "tr": "ev",
+      "uk": "дім",
+      "pl": "dom"
+    }
+  },
+  {
+    "level": "A1",
+    "topic": "Daily life",
+    "word": "family",
+    "sentence": "My _____ is very friendly.",
+    "tr": {
+      "ru": "семья",
+      "kk": "отбасы",
+      "sv": "familj",
+      "de": "Familie",
+      "es": "familia",
+      "fr": "famille",
+      "it": "famiglia",
+      "tr": "aile",
+      "uk": "сім’я",
+      "pl": "rodzina"
+    }
+  },
+  {
+    "level": "A1",
+    "topic": "Daily life",
+    "word": "friend",
+    "sentence": "This is my best _____.",
+    "tr": {
+      "ru": "друг",
+      "kk": "дос",
+      "sv": "vän",
+      "de": "Freund",
+      "es": "amigo",
+      "fr": "ami",
+      "it": "amico",
+      "tr": "arkadaş",
+      "uk": "друг",
+      "pl": "przyjaciel"
+    }
+  },
+  {
+    "level": "A1",
+    "topic": "Daily life",
+    "word": "room",
+    "sentence": "My _____ is small but nice.",
+    "tr": {
+      "ru": "комната",
+      "kk": "бөлме",
+      "sv": "rum",
+      "de": "Zimmer",
+      "es": "habitación",
+      "fr": "chambre",
+      "it": "stanza",
+      "tr": "oda",
+      "uk": "кімната",
+      "pl": "pokój"
+    }
+  },
+  {
+    "level": "A1",
+    "topic": "Daily life",
+    "word": "school",
+    "sentence": "I go to _____ every day.",
+    "tr": {
+      "ru": "школа",
+      "kk": "мектеп",
+      "sv": "skola",
+      "de": "Schule",
+      "es": "escuela",
+      "fr": "école",
+      "it": "scuola",
+      "tr": "okul",
+      "uk": "школа",
+      "pl": "szkoła"
+    }
+  },
+  {
+    "level": "A1",
+    "topic": "Food",
+    "word": "water",
+    "sentence": "Can I have some _____, please?",
+    "tr": {
+      "ru": "вода",
+      "kk": "су",
+      "sv": "vatten",
+      "de": "Wasser",
+      "es": "agua",
+      "fr": "eau",
+      "it": "acqua",
+      "tr": "su",
+      "uk": "вода",
+      "pl": "woda"
+    }
+  },
+  {
+    "level": "A1",
+    "topic": "Food",
+    "word": "bread",
+    "sentence": "I eat _____ for breakfast.",
+    "tr": {
+      "ru": "хлеб",
+      "kk": "нан",
+      "sv": "bröd",
+      "de": "Brot",
+      "es": "pan",
+      "fr": "pain",
+      "it": "pane",
+      "tr": "ekmek",
+      "uk": "хліб",
+      "pl": "chleb"
+    }
+  },
+  {
+    "level": "A1",
+    "topic": "Food",
+    "word": "apple",
+    "sentence": "She has an _____ in her bag.",
+    "tr": {
+      "ru": "яблоко",
+      "kk": "алма",
+      "sv": "äpple",
+      "de": "Apfel",
+      "es": "manzana",
+      "fr": "pomme",
+      "it": "mela",
+      "tr": "elma",
+      "uk": "яблуко",
+      "pl": "jabłko"
+    }
+  },
+  {
+    "level": "A1",
+    "topic": "Food",
+    "word": "milk",
+    "sentence": "I drink _____ in the morning.",
+    "tr": {
+      "ru": "молоко",
+      "kk": "сүт",
+      "sv": "mjölk",
+      "de": "Milch",
+      "es": "leche",
+      "fr": "lait",
+      "it": "latte",
+      "tr": "süt",
+      "uk": "молоко",
+      "pl": "mleko"
+    }
+  },
+  {
+    "level": "A1",
+    "topic": "Travel",
+    "word": "bus",
+    "sentence": "We take the _____ to school.",
+    "tr": {
+      "ru": "автобус",
+      "kk": "автобус",
+      "sv": "buss",
+      "de": "Bus",
+      "es": "autobús",
+      "fr": "bus",
+      "it": "autobus",
+      "tr": "otobüs",
+      "uk": "автобус",
+      "pl": "autobus"
+    }
+  },
+  {
+    "level": "A1",
+    "topic": "People",
+    "word": "mother",
+    "sentence": "My _____ is at home.",
+    "tr": {
+      "ru": "мама",
+      "kk": "ана",
+      "sv": "mamma",
+      "de": "Mutter",
+      "es": "madre",
+      "fr": "mère",
+      "it": "madre",
+      "tr": "anne",
+      "uk": "мама",
+      "pl": "matka"
+    }
+  },
+  {
+    "level": "A1",
+    "topic": "People",
+    "word": "teacher",
+    "sentence": "The _____ explains the task.",
+    "tr": {
+      "ru": "учитель",
+      "kk": "мұғалім",
+      "sv": "lärare",
+      "de": "Lehrer",
+      "es": "profesor",
+      "fr": "professeur",
+      "it": "insegnante",
+      "tr": "öğretmen",
+      "uk": "вчитель",
+      "pl": "nauczyciel"
+    }
+  },
+  {
+    "level": "A2",
+    "topic": "School",
+    "word": "homework",
+    "sentence": "I finished my _____ before dinner.",
+    "tr": {
+      "ru": "домашнее задание",
+      "kk": "үй тапсырмасы",
+      "sv": "läxa",
+      "de": "Hausaufgaben",
+      "es": "tarea",
+      "fr": "devoirs",
+      "it": "compiti",
+      "tr": "ödev",
+      "uk": "домашнє завдання",
+      "pl": "praca domowa"
+    }
+  },
+  {
+    "level": "A2",
+    "topic": "Travel",
+    "word": "ticket",
+    "sentence": "I bought a train _____.",
+    "tr": {
+      "ru": "билет",
+      "kk": "билет",
+      "sv": "biljett",
+      "de": "Ticket",
+      "es": "billete",
+      "fr": "billet",
+      "it": "biglietto",
+      "tr": "bilet",
+      "uk": "квиток",
+      "pl": "bilet"
+    }
+  },
+  {
+    "level": "A2",
+    "topic": "Health",
+    "word": "tired",
+    "sentence": "I am very _____ after school.",
+    "tr": {
+      "ru": "уставший",
+      "kk": "шаршаған",
+      "sv": "trött",
+      "de": "müde",
+      "es": "cansado",
+      "fr": "fatigué",
+      "it": "stanco",
+      "tr": "yorgun",
+      "uk": "втомлений",
+      "pl": "zmęczony"
+    }
+  },
+  {
+    "level": "A2",
+    "topic": "Daily life",
+    "word": "busy",
+    "sentence": "I am _____ today.",
+    "tr": {
+      "ru": "занятый",
+      "kk": "бос емес",
+      "sv": "upptagen",
+      "de": "beschäftigt",
+      "es": "ocupado",
+      "fr": "occupé",
+      "it": "occupato",
+      "tr": "meşgul",
+      "uk": "зайнятий",
+      "pl": "zajęty"
+    }
+  },
+  {
+    "level": "A2",
+    "topic": "Daily life",
+    "word": "clean",
+    "sentence": "Please _____ your desk.",
+    "tr": {
+      "ru": "убирать / чистить",
+      "kk": "тазалау",
+      "sv": "städa",
+      "de": "putzen",
+      "es": "limpiar",
+      "fr": "nettoyer",
+      "it": "pulire",
+      "tr": "temizlemek",
+      "uk": "прибирати",
+      "pl": "sprzątać"
+    }
+  },
+  {
+    "level": "A2",
+    "topic": "Shopping",
+    "word": "price",
+    "sentence": "What is the _____ of this bag?",
+    "tr": {
+      "ru": "цена",
+      "kk": "баға",
+      "sv": "pris",
+      "de": "Preis",
+      "es": "precio",
+      "fr": "prix",
+      "it": "prezzo",
+      "tr": "fiyat",
+      "uk": "ціна",
+      "pl": "cena"
+    }
+  },
+  {
+    "level": "A2",
+    "topic": "Travel",
+    "word": "station",
+    "sentence": "Meet me at the bus _____.",
+    "tr": {
+      "ru": "станция / остановка",
+      "kk": "бекет",
+      "sv": "station",
+      "de": "Bahnhof",
+      "es": "estación",
+      "fr": "gare",
+      "it": "stazione",
+      "tr": "istasyon",
+      "uk": "станція",
+      "pl": "stacja"
+    }
+  },
+  {
+    "level": "A2",
+    "topic": "Health",
+    "word": "medicine",
+    "sentence": "Take this _____ after lunch.",
+    "tr": {
+      "ru": "лекарство",
+      "kk": "дәрі",
+      "sv": "medicin",
+      "de": "Medizin",
+      "es": "medicina",
+      "fr": "médicament",
+      "it": "medicina",
+      "tr": "ilaç",
+      "uk": "ліки",
+      "pl": "lekarstwo"
+    }
+  },
+  {
+    "level": "A2",
+    "topic": "Work",
+    "word": "meeting",
+    "sentence": "We have a _____ at ten.",
+    "tr": {
+      "ru": "встреча",
+      "kk": "кездесу",
+      "sv": "möte",
+      "de": "Besprechung",
+      "es": "reunión",
+      "fr": "réunion",
+      "it": "riunione",
+      "tr": "toplantı",
+      "uk": "зустріч",
+      "pl": "spotkanie"
+    }
+  },
+  {
+    "level": "A2",
+    "topic": "Emotions",
+    "word": "worried",
+    "sentence": "She is _____ about the test.",
+    "tr": {
+      "ru": "взволнованный / обеспокоенный",
+      "kk": "уайымдаған",
+      "sv": "orolig",
+      "de": "besorgt",
+      "es": "preocupado",
+      "fr": "inquiet",
+      "it": "preoccupato",
+      "tr": "endişeli",
+      "uk": "стурбований",
+      "pl": "zmartwiony"
+    }
+  },
+  {
+    "level": "A2",
+    "topic": "Study",
+    "word": "practice",
+    "sentence": "You need more _____ before the exam.",
+    "tr": {
+      "ru": "практика",
+      "kk": "тәжірибе",
+      "sv": "övning",
+      "de": "Übung",
+      "es": "práctica",
+      "fr": "pratique",
+      "it": "pratica",
+      "tr": "pratik",
+      "uk": "практика",
+      "pl": "praktyka"
+    }
+  },
+  {
+    "level": "A2",
+    "topic": "Travel",
+    "word": "arrive",
+    "sentence": "We will _____ at six.",
+    "tr": {
+      "ru": "прибывать",
+      "kk": "келу",
+      "sv": "anlända",
+      "de": "ankommen",
+      "es": "llegar",
+      "fr": "arriver",
+      "it": "arrivare",
+      "tr": "varmak",
+      "uk": "прибувати",
+      "pl": "przybyć"
+    }
+  },
+  {
+    "level": "B1",
+    "topic": "Emotions",
+    "word": "confident",
+    "sentence": "She feels _____ before the exam.",
+    "tr": {
+      "ru": "уверенный",
+      "kk": "сенімді",
+      "sv": "självsäker",
+      "de": "selbstbewusst",
+      "es": "seguro",
+      "fr": "confiant",
+      "it": "sicuro",
+      "tr": "kendinden emin",
+      "uk": "впевнений",
+      "pl": "pewny siebie"
+    }
+  },
+  {
+    "level": "B1",
+    "topic": "Work",
+    "word": "deadline",
+    "sentence": "The project _____ is Friday.",
+    "tr": {
+      "ru": "крайний срок",
+      "kk": "соңғы мерзім",
+      "sv": "deadline",
+      "de": "Frist",
+      "es": "fecha límite",
+      "fr": "date limite",
+      "it": "scadenza",
+      "tr": "son teslim tarihi",
+      "uk": "дедлайн",
+      "pl": "termin"
+    }
+  },
+  {
+    "level": "B1",
+    "topic": "Study",
+    "word": "improve",
+    "sentence": "I want to _____ my English.",
+    "tr": {
+      "ru": "улучшать",
+      "kk": "жақсарту",
+      "sv": "förbättra",
+      "de": "verbessern",
+      "es": "mejorar",
+      "fr": "améliorer",
+      "it": "migliorare",
+      "tr": "geliştirmek",
+      "uk": "покращувати",
+      "pl": "poprawić"
+    }
+  },
+  {
+    "level": "B1",
+    "topic": "Work",
+    "word": "responsible",
+    "sentence": "She is _____ for the report.",
+    "tr": {
+      "ru": "ответственный",
+      "kk": "жауапты",
+      "sv": "ansvarig",
+      "de": "verantwortlich",
+      "es": "responsable",
+      "fr": "responsable",
+      "it": "responsabile",
+      "tr": "sorumlu",
+      "uk": "відповідальний",
+      "pl": "odpowiedzialny"
+    }
+  },
+  {
+    "level": "B1",
+    "topic": "Daily life",
+    "word": "decision",
+    "sentence": "It was a difficult _____.",
+    "tr": {
+      "ru": "решение",
+      "kk": "шешім",
+      "sv": "beslut",
+      "de": "Entscheidung",
+      "es": "decisión",
+      "fr": "décision",
+      "it": "decisione",
+      "tr": "karar",
+      "uk": "рішення",
+      "pl": "decyzja"
+    }
+  },
+  {
+    "level": "B1",
+    "topic": "Emotions",
+    "word": "disappointed",
+    "sentence": "He was _____ with the result.",
+    "tr": {
+      "ru": "разочарованный",
+      "kk": "көңілі қалған",
+      "sv": "besviken",
+      "de": "enttäuscht",
+      "es": "decepcionado",
+      "fr": "déçu",
+      "it": "deluso",
+      "tr": "hayal kırıklığına uğramış",
+      "uk": "розчарований",
+      "pl": "rozczarowany"
+    }
+  },
+  {
+    "level": "B1",
+    "topic": "Society",
+    "word": "community",
+    "sentence": "The whole _____ helped them.",
+    "tr": {
+      "ru": "сообщество",
+      "kk": "қауымдастық",
+      "sv": "gemenskap",
+      "de": "Gemeinschaft",
+      "es": "comunidad",
+      "fr": "communauté",
+      "it": "comunità",
+      "tr": "topluluk",
+      "uk": "громада",
+      "pl": "społeczność"
+    }
+  },
+  {
+    "level": "B1",
+    "topic": "Work",
+    "word": "experience",
+    "sentence": "She has a lot of work _____.",
+    "tr": {
+      "ru": "опыт",
+      "kk": "тәжірибе",
+      "sv": "erfarenhet",
+      "de": "Erfahrung",
+      "es": "experiencia",
+      "fr": "expérience",
+      "it": "esperienza",
+      "tr": "deneyim",
+      "uk": "досвід",
+      "pl": "doświadczenie"
+    }
+  },
+  {
+    "level": "B1",
+    "topic": "Study",
+    "word": "explain",
+    "sentence": "Can you _____ this rule?",
+    "tr": {
+      "ru": "объяснять",
+      "kk": "түсіндіру",
+      "sv": "förklara",
+      "de": "erklären",
+      "es": "explicar",
+      "fr": "expliquer",
+      "it": "spiegare",
+      "tr": "açıklamak",
+      "uk": "пояснювати",
+      "pl": "wyjaśniać"
+    }
+  },
+  {
+    "level": "B1",
+    "topic": "Travel",
+    "word": "journey",
+    "sentence": "The _____ took three hours.",
+    "tr": {
+      "ru": "путешествие / поездка",
+      "kk": "сапар",
+      "sv": "resa",
+      "de": "Reise",
+      "es": "viaje",
+      "fr": "voyage",
+      "it": "viaggio",
+      "tr": "yolculuk",
+      "uk": "подорож",
+      "pl": "podróż"
+    }
+  },
+  {
+    "level": "B1",
+    "topic": "Emotions",
+    "word": "relieved",
+    "sentence": "I felt _____ after the test.",
+    "tr": {
+      "ru": "облегчённый",
+      "kk": "жеңілдеген",
+      "sv": "lättad",
+      "de": "erleichtert",
+      "es": "aliviado",
+      "fr": "soulagé",
+      "it": "sollevato",
+      "tr": "rahatlamış",
+      "uk": "полегшений",
+      "pl": "odczuwający ulgę"
+    }
+  },
+  {
+    "level": "B1",
+    "topic": "Work",
+    "word": "skill",
+    "sentence": "Communication is an important _____.",
+    "tr": {
+      "ru": "навык",
+      "kk": "дағды",
+      "sv": "färdighet",
+      "de": "Fähigkeit",
+      "es": "habilidad",
+      "fr": "compétence",
+      "it": "abilità",
+      "tr": "beceri",
+      "uk": "навичка",
+      "pl": "umiejętność"
+    }
+  },
+  {
+    "level": "B2",
+    "topic": "Business",
+    "word": "negotiate",
+    "sentence": "The companies will _____ the price.",
+    "tr": {
+      "ru": "вести переговоры",
+      "kk": "келіссөз жүргізу",
+      "sv": "förhandla",
+      "de": "verhandeln",
+      "es": "negociar",
+      "fr": "négocier",
+      "it": "negoziare",
+      "tr": "müzakere etmek",
+      "uk": "вести переговори",
+      "pl": "negocjować"
+    }
+  },
+  {
+    "level": "B2",
+    "topic": "Technology",
+    "word": "privacy",
+    "sentence": "Online _____ is very important.",
+    "tr": {
+      "ru": "конфиденциальность",
+      "kk": "құпиялылық",
+      "sv": "integritet",
+      "de": "Datenschutz",
+      "es": "privacidad",
+      "fr": "confidentialité",
+      "it": "privacy",
+      "tr": "gizlilik",
+      "uk": "конфіденційність",
+      "pl": "prywatność"
+    }
+  },
+  {
+    "level": "B2",
+    "topic": "Society",
+    "word": "responsibility",
+    "sentence": "Everyone has a _____ to help.",
+    "tr": {
+      "ru": "ответственность",
+      "kk": "жауапкершілік",
+      "sv": "ansvar",
+      "de": "Verantwortung",
+      "es": "responsabilidad",
+      "fr": "responsabilité",
+      "it": "responsabilità",
+      "tr": "sorumluluk",
+      "uk": "відповідальність",
+      "pl": "odpowiedzialność"
+    }
+  },
+  {
+    "level": "B2",
+    "topic": "Business",
+    "word": "proposal",
+    "sentence": "They accepted our business _____.",
+    "tr": {
+      "ru": "предложение",
+      "kk": "ұсыныс",
+      "sv": "förslag",
+      "de": "Vorschlag",
+      "es": "propuesta",
+      "fr": "proposition",
+      "it": "proposta",
+      "tr": "teklif",
+      "uk": "пропозиція",
+      "pl": "propozycja"
+    }
+  },
+  {
+    "level": "B2",
+    "topic": "Technology",
+    "word": "device",
+    "sentence": "This _____ saves time.",
+    "tr": {
+      "ru": "устройство",
+      "kk": "құрылғы",
+      "sv": "enhet",
+      "de": "Gerät",
+      "es": "dispositivo",
+      "fr": "appareil",
+      "it": "dispositivo",
+      "tr": "cihaz",
+      "uk": "пристрій",
+      "pl": "urządzenie"
+    }
+  },
+  {
+    "level": "B2",
+    "topic": "Society",
+    "word": "impact",
+    "sentence": "The law had a strong _____.",
+    "tr": {
+      "ru": "влияние",
+      "kk": "әсер",
+      "sv": "påverkan",
+      "de": "Auswirkung",
+      "es": "impacto",
+      "fr": "impact",
+      "it": "impatto",
+      "tr": "etki",
+      "uk": "вплив",
+      "pl": "wpływ"
+    }
+  },
+  {
+    "level": "B2",
+    "topic": "Business",
+    "word": "budget",
+    "sentence": "We need to reduce the _____.",
+    "tr": {
+      "ru": "бюджет",
+      "kk": "бюджет",
+      "sv": "budget",
+      "de": "Budget",
+      "es": "presupuesto",
+      "fr": "budget",
+      "it": "bilancio",
+      "tr": "bütçe",
+      "uk": "бюджет",
+      "pl": "budżet"
+    }
+  },
+  {
+    "level": "B2",
+    "topic": "Academic",
+    "word": "argument",
+    "sentence": "Her _____ was clear and logical.",
+    "tr": {
+      "ru": "аргумент",
+      "kk": "дәйек",
+      "sv": "argument",
+      "de": "Argument",
+      "es": "argumento",
+      "fr": "argument",
+      "it": "argomento",
+      "tr": "argüman",
+      "uk": "аргумент",
+      "pl": "argument"
+    }
+  },
+  {
+    "level": "B2",
+    "topic": "Emotions",
+    "word": "frustrated",
+    "sentence": "He felt _____ because nothing worked.",
+    "tr": {
+      "ru": "раздражённый / расстроенный",
+      "kk": "ашуланған",
+      "sv": "frustrerad",
+      "de": "frustriert",
+      "es": "frustrado",
+      "fr": "frustré",
+      "it": "frustrato",
+      "tr": "sinirli",
+      "uk": "розчарований",
+      "pl": "sfrustrowany"
+    }
+  },
+  {
+    "level": "B2",
+    "topic": "Work",
+    "word": "efficient",
+    "sentence": "This method is faster and more _____.",
+    "tr": {
+      "ru": "эффективный",
+      "kk": "тиімді",
+      "sv": "effektiv",
+      "de": "effizient",
+      "es": "eficiente",
+      "fr": "efficace",
+      "it": "efficiente",
+      "tr": "verimli",
+      "uk": "ефективний",
+      "pl": "wydajny"
+    }
+  },
+  {
+    "level": "B2",
+    "topic": "Business",
+    "word": "profit",
+    "sentence": "The company made a large _____.",
+    "tr": {
+      "ru": "прибыль",
+      "kk": "пайда",
+      "sv": "vinst",
+      "de": "Gewinn",
+      "es": "beneficio",
+      "fr": "profit",
+      "it": "profitto",
+      "tr": "kâr",
+      "uk": "прибуток",
+      "pl": "zysk"
+    }
+  },
+  {
+    "level": "B2",
+    "topic": "Technology",
+    "word": "security",
+    "sentence": "Data _____ protects users.",
+    "tr": {
+      "ru": "безопасность",
+      "kk": "қауіпсіздік",
+      "sv": "säkerhet",
+      "de": "Sicherheit",
+      "es": "seguridad",
+      "fr": "sécurité",
+      "it": "sicurezza",
+      "tr": "güvenlik",
+      "uk": "безпека",
+      "pl": "bezpieczeństwo"
+    }
+  },
+  {
+    "level": "C1",
+    "topic": "Academic",
+    "word": "assumption",
+    "sentence": "This argument is based on a weak _____.",
+    "tr": {
+      "ru": "предположение",
+      "kk": "болжам",
+      "sv": "antagande",
+      "de": "Annahme",
+      "es": "suposición",
+      "fr": "hypothèse",
+      "it": "ipotesi",
+      "tr": "varsayım",
+      "uk": "припущення",
+      "pl": "założenie"
+    }
+  },
+  {
+    "level": "C1",
+    "topic": "Academic",
+    "word": "evidence",
+    "sentence": "The claim needs stronger _____.",
+    "tr": {
+      "ru": "доказательства",
+      "kk": "дәлел",
+      "sv": "bevis",
+      "de": "Beweise",
+      "es": "evidencia",
+      "fr": "preuves",
+      "it": "prove",
+      "tr": "kanıt",
+      "uk": "докази",
+      "pl": "dowody"
+    }
+  },
+  {
+    "level": "C1",
+    "topic": "Business",
+    "word": "strategy",
+    "sentence": "The company changed its _____.",
+    "tr": {
+      "ru": "стратегия",
+      "kk": "стратегия",
+      "sv": "strategi",
+      "de": "Strategie",
+      "es": "estrategia",
+      "fr": "stratégie",
+      "it": "strategia",
+      "tr": "strateji",
+      "uk": "стратегія",
+      "pl": "strategia"
+    }
+  },
+  {
+    "level": "C1",
+    "topic": "Academic",
+    "word": "evaluate",
+    "sentence": "Researchers must _____ the results carefully.",
+    "tr": {
+      "ru": "оценивать",
+      "kk": "бағалау",
+      "sv": "utvärdera",
+      "de": "bewerten",
+      "es": "evaluar",
+      "fr": "évaluer",
+      "it": "valutare",
+      "tr": "değerlendirmek",
+      "uk": "оцінювати",
+      "pl": "oceniać"
+    }
+  },
+  {
+    "level": "C1",
+    "topic": "Society",
+    "word": "inequality",
+    "sentence": "Education can reduce _____.",
+    "tr": {
+      "ru": "неравенство",
+      "kk": "теңсіздік",
+      "sv": "ojämlikhet",
+      "de": "Ungleichheit",
+      "es": "desigualdad",
+      "fr": "inégalité",
+      "it": "disuguaglianza",
+      "tr": "eşitsizlik",
+      "uk": "нерівність",
+      "pl": "nierówność"
+    }
+  },
+  {
+    "level": "C1",
+    "topic": "Academic",
+    "word": "interpret",
+    "sentence": "Students must _____ the data.",
+    "tr": {
+      "ru": "интерпретировать",
+      "kk": "түсіндіру",
+      "sv": "tolka",
+      "de": "interpretieren",
+      "es": "interpretar",
+      "fr": "interpréter",
+      "it": "interpretare",
+      "tr": "yorumlamak",
+      "uk": "інтерпретувати",
+      "pl": "interpretować"
+    }
+  },
+  {
+    "level": "C1",
+    "topic": "Business",
+    "word": "implement",
+    "sentence": "The team will _____ a new plan.",
+    "tr": {
+      "ru": "внедрять",
+      "kk": "іске асыру",
+      "sv": "genomföra",
+      "de": "umsetzen",
+      "es": "implementar",
+      "fr": "mettre en œuvre",
+      "it": "implementare",
+      "tr": "uygulamak",
+      "uk": "впроваджувати",
+      "pl": "wdrażać"
+    }
+  },
+  {
+    "level": "C1",
+    "topic": "Academic",
+    "word": "criteria",
+    "sentence": "The essay must meet the assessment _____.",
+    "tr": {
+      "ru": "критерии",
+      "kk": "өлшемдер",
+      "sv": "kriterier",
+      "de": "Kriterien",
+      "es": "criterios",
+      "fr": "critères",
+      "it": "criteri",
+      "tr": "kriterler",
+      "uk": "критерії",
+      "pl": "kryteria"
+    }
+  },
+  {
+    "level": "C1",
+    "topic": "Business",
+    "word": "sustainable",
+    "sentence": "The company needs a _____ model.",
+    "tr": {
+      "ru": "устойчивый",
+      "kk": "тұрақты",
+      "sv": "hållbar",
+      "de": "nachhaltig",
+      "es": "sostenible",
+      "fr": "durable",
+      "it": "sostenibile",
+      "tr": "sürdürülebilir",
+      "uk": "сталий",
+      "pl": "zrównoważony"
+    }
+  },
+  {
+    "level": "C1",
+    "topic": "Academic",
+    "word": "perspective",
+    "sentence": "This gives us a different _____.",
+    "tr": {
+      "ru": "точка зрения",
+      "kk": "көзқарас",
+      "sv": "perspektiv",
+      "de": "Perspektive",
+      "es": "perspectiva",
+      "fr": "perspective",
+      "it": "prospettiva",
+      "tr": "bakış açısı",
+      "uk": "перспектива",
+      "pl": "perspektywa"
+    }
+  },
+  {
+    "level": "C1",
+    "topic": "Society",
+    "word": "legislation",
+    "sentence": "New _____ changed the rules.",
+    "tr": {
+      "ru": "законодательство",
+      "kk": "заңнама",
+      "sv": "lagstiftning",
+      "de": "Gesetzgebung",
+      "es": "legislación",
+      "fr": "législation",
+      "it": "legislazione",
+      "tr": "mevzuat",
+      "uk": "законодавство",
+      "pl": "ustawodawstwo"
+    }
+  },
+  {
+    "level": "C1",
+    "topic": "Academic",
+    "word": "relevant",
+    "sentence": "Only _____ examples should be included.",
+    "tr": {
+      "ru": "релевантный / уместный",
+      "kk": "маңызды / қатысты",
+      "sv": "relevant",
+      "de": "relevant",
+      "es": "relevante",
+      "fr": "pertinent",
+      "it": "rilevante",
+      "tr": "ilgili",
+      "uk": "релевантний",
+      "pl": "istotny"
+    }
+  },
+  {
+    "level": "C2",
+    "topic": "Advanced",
+    "word": "ambiguous",
+    "sentence": "The instructions were _____ and confusing.",
+    "tr": {
+      "ru": "двусмысленный",
+      "kk": "екіұшты",
+      "sv": "tvetydig",
+      "de": "mehrdeutig",
+      "es": "ambiguo",
+      "fr": "ambigu",
+      "it": "ambiguo",
+      "tr": "belirsiz",
+      "uk": "двозначний",
+      "pl": "niejednoznaczny"
+    }
+  },
+  {
+    "level": "C2",
+    "topic": "Advanced",
+    "word": "subtle",
+    "sentence": "There was a _____ difference between the two ideas.",
+    "tr": {
+      "ru": "тонкий / едва заметный",
+      "kk": "нәзік / байқалмайтын",
+      "sv": "subtil",
+      "de": "subtil",
+      "es": "sutil",
+      "fr": "subtil",
+      "it": "sottile",
+      "tr": "ince",
+      "uk": "тонкий",
+      "pl": "subtelny"
+    }
+  },
+  {
+    "level": "C2",
+    "topic": "Advanced",
+    "word": "meticulous",
+    "sentence": "She is _____ when checking details.",
+    "tr": {
+      "ru": "дотошный",
+      "kk": "ұқыпты",
+      "sv": "noggrann",
+      "de": "akribisch",
+      "es": "meticuloso",
+      "fr": "méticuleux",
+      "it": "meticoloso",
+      "tr": "titiz",
+      "uk": "ретельний",
+      "pl": "skrupulatny"
+    }
+  },
+  {
+    "level": "C2",
+    "topic": "Advanced",
+    "word": "scrutinize",
+    "sentence": "The committee will _____ every detail.",
+    "tr": {
+      "ru": "тщательно изучать",
+      "kk": "мұқият тексеру",
+      "sv": "granska",
+      "de": "genau prüfen",
+      "es": "examinar minuciosamente",
+      "fr": "examiner minutieusement",
+      "it": "esaminare attentamente",
+      "tr": "incelemek",
+      "uk": "ретельно перевіряти",
+      "pl": "dokładnie analizować"
+    }
+  },
+  {
+    "level": "C2",
+    "topic": "Advanced",
+    "word": "convoluted",
+    "sentence": "The explanation was too _____ to follow.",
+    "tr": {
+      "ru": "запутанный",
+      "kk": "күрделі / шатасқан",
+      "sv": "invecklad",
+      "de": "kompliziert",
+      "es": "enrevesado",
+      "fr": "alambiqué",
+      "it": "contorto",
+      "tr": "karmaşık",
+      "uk": "заплутаний",
+      "pl": "zawiły"
+    }
+  },
+  {
+    "level": "C2",
+    "topic": "Advanced",
+    "word": "mitigate",
+    "sentence": "They tried to _____ the risks.",
+    "tr": {
+      "ru": "смягчать / уменьшать",
+      "kk": "азайту",
+      "sv": "mildra",
+      "de": "mindern",
+      "es": "mitigar",
+      "fr": "atténuer",
+      "it": "mitigare",
+      "tr": "azaltmak",
+      "uk": "пом’якшувати",
+      "pl": "łagodzić"
+    }
+  },
+  {
+    "level": "C2",
+    "topic": "Advanced",
+    "word": "inherent",
+    "sentence": "There are _____ problems in this system.",
+    "tr": {
+      "ru": "присущий",
+      "kk": "тән",
+      "sv": "inneboende",
+      "de": "inhärent",
+      "es": "inherente",
+      "fr": "inhérent",
+      "it": "intrinseco",
+      "tr": "doğasında olan",
+      "uk": "властивий",
+      "pl": "wrodzony"
+    }
+  },
+  {
+    "level": "C2",
+    "topic": "Advanced",
+    "word": "nuance",
+    "sentence": "The debate lacks _____.",
+    "tr": {
+      "ru": "нюанс",
+      "kk": "реңк / нюанс",
+      "sv": "nyans",
+      "de": "Nuance",
+      "es": "matiz",
+      "fr": "nuance",
+      "it": "sfumatura",
+      "tr": "nüans",
+      "uk": "нюанс",
+      "pl": "niuans"
+    }
+  },
+  {
+    "level": "C2",
+    "topic": "Advanced",
+    "word": "paradox",
+    "sentence": "This creates a strange _____.",
+    "tr": {
+      "ru": "парадокс",
+      "kk": "парадокс",
+      "sv": "paradox",
+      "de": "Paradox",
+      "es": "paradoja",
+      "fr": "paradoxe",
+      "it": "paradosso",
+      "tr": "paradoks",
+      "uk": "парадокс",
+      "pl": "paradoks"
+    }
+  },
+  {
+    "level": "C2",
+    "topic": "Advanced",
+    "word": "resilient",
+    "sentence": "The system is surprisingly _____.",
+    "tr": {
+      "ru": "устойчивый / стойкий",
+      "kk": "төзімді",
+      "sv": "motståndskraftig",
+      "de": "widerstandsfähig",
+      "es": "resiliente",
+      "fr": "résilient",
+      "it": "resiliente",
+      "tr": "dirençli",
+      "uk": "стійкий",
+      "pl": "odporny"
+    }
+  },
+  {
+    "level": "C2",
+    "topic": "Advanced",
+    "word": "undermine",
+    "sentence": "False information can _____ trust.",
+    "tr": {
+      "ru": "подрывать",
+      "kk": "әлсірету",
+      "sv": "underminera",
+      "de": "untergraben",
+      "es": "socavar",
+      "fr": "saper",
+      "it": "minare",
+      "tr": "zayıflatmak",
+      "uk": "підривати",
+      "pl": "podważać"
+    }
+  },
+  {
+    "level": "C2",
+    "topic": "Advanced",
+    "word": "discrepancy",
+    "sentence": "There is a clear _____ in the data.",
+    "tr": {
+      "ru": "несоответствие",
+      "kk": "сәйкессіздік",
+      "sv": "avvikelse",
+      "de": "Diskrepanz",
+      "es": "discrepancia",
+      "fr": "écart",
+      "it": "discrepanza",
+      "tr": "tutarsızlık",
+      "uk": "розбіжність",
+      "pl": "rozbieżność"
+    }
+  }
 ];
 
 const DEFAULT_INPUT = WORD_BANK.slice(7, 16).map((item) => `${item.word} — ${item.tr.ru}`).join(NL);
@@ -100,11 +1377,18 @@ function shuffle(items) {
 }
 
 function pickAutoWords(level, topic, count) {
-  let pool = WORD_BANK.filter((item) => item.level === level);
-  if (topic !== "Any topic") pool = pool.filter((item) => item.topic === topic);
-  if (pool.length < count) pool = WORD_BANK.filter((item) => level === "Mixed" || item.level === level || topic === "Any topic");
-  if (pool.length < count) pool = WORD_BANK;
-  return shuffle(pool).slice(0, Math.min(count, pool.length));
+  const needed = Math.max(3, Math.min(Number(count) || 10, 18));
+
+  let levelPool = level === "Mixed"
+    ? [...WORD_BANK]
+    : WORD_BANK.filter((item) => item.level === level);
+
+  if (topic !== "Any topic") {
+    const topicPool = levelPool.filter((item) => item.topic === topic);
+    if (topicPool.length > 0) levelPool = topicPool;
+  }
+
+  return shuffle(levelPool).slice(0, Math.min(needed, levelPool.length));
 }
 
 function fileName(title) {
@@ -437,7 +1721,8 @@ function App() {
   const words = autoMode ? autoWords : customWords;
   const settings = { title, level, format, targetLanguage, exerciseType, autoMode, showAnswers };
   const generatedText = output || buildWorksheet(words, settings);
-  const topics = ["Any topic", ...Array.from(new Set(WORD_BANK.map((item) => item.topic))).sort()];
+  const levelTopics = level === "Mixed" ? WORD_BANK : WORD_BANK.filter((item) => item.level === level);
+  const topics = ["Any topic", ...Array.from(new Set(levelTopics.map((item) => item.topic))).sort()];
   const selectedLang = languageByCode(targetLanguage);
   const testQuestions = useMemo(() => buildTestQuestions(words, targetLanguage), [words, targetLanguage, testSeed]);
   const score = testQuestions.reduce((total, question) => total + (answerIsCorrect(answers[question.id], question.expected) ? 1 : 0), 0);
