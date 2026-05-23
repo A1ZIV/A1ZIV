@@ -219,6 +219,102 @@ function dialoguePractice(words, level) {
   return lines.join(NL);
 }
 
+function spellingPractice(words, showAnswers = true) {
+  const lines = ["EXERCISE 7. Spelling practice. Write the full English word.", ""];
+  words.forEach((item, index) => {
+    const hidden = item.word.split("").map((char, i) => (char === " " ? " / " : i % 2 === 0 ? char : "_")).join("");
+    lines.push(`${index + 1}. ${hidden} — ______________________________`);
+  });
+  if (showAnswers) {
+    lines.push("", "Answer Key:");
+    words.forEach((item, index) => lines.push(`${index + 1}. ${item.word}`));
+  }
+  return lines.join(NL);
+}
+
+function definitionPractice(words, langCode, showAnswers = true) {
+  const lines = ["EXERCISE 8. Write a simple English definition.", "", "Do not translate. Explain the word in English.", ""];
+  words.forEach((item, index) => lines.push(`${index + 1}. ${item.word} (${translationOf(item, langCode)}) — ________________________________________________________________`));
+  if (showAnswers) lines.push("", "Teacher check: accept clear English definitions that match the meaning.");
+  return lines.join(NL);
+}
+
+function questionPractice(words, level) {
+  const lines = ["EXERCISE 9. Answer the questions using the target words.", "", `Level focus: ${level}. Answer in full sentences.`, ""];
+  words.forEach((item, index) => lines.push(`${index + 1}. Can you describe a situation connected with \"${item.word}\"?`));
+  return lines.join(NL);
+}
+
+function sentenceTransformation(words, langCode, showAnswers = true) {
+  const lines = ["EXERCISE 10. Sentence transformation.", "", "Rewrite each sentence using the word in brackets. Keep the meaning similar.", ""];
+  words.forEach((item, index) => {
+    const base = item.sentence || `This sentence should use the word ${item.word}.`;
+    lines.push(`${index + 1}. ${base.replace("_____", translationOf(item, langCode))} (${item.word})`);
+    lines.push("   → ________________________________________________________________");
+  });
+  if (showAnswers) lines.push("", "Teacher check: the answer must use the word in brackets naturally and keep a similar meaning.");
+  return lines.join(NL);
+}
+
+function wordFormation(words, showAnswers = true) {
+  const lines = ["EXERCISE 11. Word formation.", "", "Make a new word form. Example: educate → education / educational.", ""];
+  words.forEach((item, index) => lines.push(`${index + 1}. ${item.word} → ______________________________`));
+  if (showAnswers) lines.push("", "Teacher check: accept correct noun, verb, adjective, or adverb forms when possible.");
+  return lines.join(NL);
+}
+
+function collocationPractice(words, showAnswers = true) {
+  const lines = ["EXERCISE 12. Collocations.", "", "Write two natural word combinations for each word.", ""];
+  words.forEach((item, index) => lines.push(`${index + 1}. ${item.word}: 1) ____________________  2) ____________________`));
+  if (showAnswers) lines.push("", "Teacher check: accept natural collocations, for example verb + noun, adjective + noun, or phrase combinations.");
+  return lines.join(NL);
+}
+
+function oddOneOut(words, langCode, showAnswers = true) {
+  const groups = [];
+  const shuffled = shuffle(words);
+  for (let i = 0; i < shuffled.length; i += 4) {
+    const group = shuffled.slice(i, i + 4);
+    if (group.length >= 3) groups.push(group);
+  }
+  const lines = ["EXERCISE 13. Odd one out.", "", "Choose the word that is least connected with the others and explain why.", ""];
+  groups.forEach((group, index) => {
+    lines.push(`${index + 1}. ${group.map((item) => item.word).join(" / ")}`);
+    lines.push("   Odd word: ____________________  Reason: ______________________________");
+  });
+  if (showAnswers) lines.push("", "Teacher check: answers may vary if the explanation is logical.");
+  return lines.join(NL);
+}
+
+function miniStory(words) {
+  const lines = ["EXERCISE 14. Mini story.", "", "Write one short story using all the words below.", ""];
+  lines.push(words.map((item) => item.word).join(" – "));
+  lines.push("", "Story:", "________________________________________________________________", "________________________________________________________________", "________________________________________________________________");
+  lines.push("", "Teacher check: the story must use the target words correctly and naturally.");
+  return lines.join(NL);
+}
+
+function mixedChallenge(words, langCode, showAnswers = true) {
+  const parts = [
+    "MIXED CHALLENGE",
+    "",
+    "Part A. Translate five words into English.",
+    ""
+  ];
+  words.slice(0, 5).forEach((item, index) => parts.push(`${index + 1}. ${translationOf(item, langCode)} — ______________________________`));
+  parts.push("", "Part B. Fill in five gaps.", "");
+  words.slice(5, 10).forEach((item, index) => parts.push(`${index + 1}. ${item.sentence || `Use the word correctly: _____.`}`));
+  parts.push("", "Part C. Write three personal examples.", "");
+  words.slice(0, 3).forEach((item, index) => parts.push(`${index + 1}. ${item.word}: ________________________________________________________________`));
+  if (showAnswers) {
+    parts.push("", "Answer Key:");
+    words.slice(0, 5).forEach((item, index) => parts.push(`A${index + 1}. ${item.word}`));
+    words.slice(5, 10).forEach((item, index) => parts.push(`B${index + 1}. ${item.word}`));
+    parts.push("C. Teacher check.");
+  }
+  return parts.join(NL);
+}
+
 function fullWorkbook(words, settings) {
   const parts = [
     header(settings),
@@ -235,6 +331,22 @@ function fullWorkbook(words, settings) {
     translateFromEnglish(words, settings.targetLanguage, settings.showAnswers),
     "",
     makeSentences(words),
+    "",
+    spellingPractice(words, settings.showAnswers),
+    "",
+    definitionPractice(words, settings.targetLanguage, settings.showAnswers),
+    "",
+    questionPractice(words, settings.level),
+    "",
+    sentenceTransformation(words, settings.targetLanguage, settings.showAnswers),
+    "",
+    wordFormation(words, settings.showAnswers),
+    "",
+    collocationPractice(words, settings.showAnswers),
+    "",
+    oddOneOut(words, settings.targetLanguage, settings.showAnswers),
+    "",
+    miniStory(words),
     "",
     "FINAL MEMORY TEST",
     "Close the word list and write the English words.",
@@ -257,6 +369,15 @@ function buildWorksheet(words, settings) {
     intoEnglish: () => translateIntoEnglish(words, settings.targetLanguage, settings.showAnswers),
     fromEnglish: () => translateFromEnglish(words, settings.targetLanguage, settings.showAnswers),
     sentences: () => makeSentences(words),
+    spelling: () => spellingPractice(words, settings.showAnswers),
+    definitions: () => definitionPractice(words, settings.targetLanguage, settings.showAnswers),
+    questions: () => questionPractice(words, settings.level),
+    transformation: () => sentenceTransformation(words, settings.targetLanguage, settings.showAnswers),
+    wordFormation: () => wordFormation(words, settings.showAnswers),
+    collocations: () => collocationPractice(words, settings.showAnswers),
+    oddOneOut: () => oddOneOut(words, settings.targetLanguage, settings.showAnswers),
+    miniStory: () => miniStory(words),
+    mixedChallenge: () => mixedChallenge(words, settings.targetLanguage, settings.showAnswers),
     full: () => fullWorkbook(words, settings)
   };
   if (settings.exerciseType === "full") return map.full();
@@ -276,7 +397,7 @@ function answerIsCorrect(value, expected) {
 }
 
 function buildTestQuestions(words, langCode) {
-  const source = shuffle(words).slice(0, Math.min(words.length, 12));
+  const source = shuffle(words).slice(0, Math.min(words.length, 16));
   return source.map((item, index) => {
     const type = ["mc", "intoEnglish", "fromEnglish", "gap"][index % 4];
     if (type === "mc") {
@@ -287,6 +408,10 @@ function buildTestQuestions(words, langCode) {
     if (type === "fromEnglish") return { id: `${item.word}-${index}`, type, item, prompt: `Translate into target language: ${item.word}`, expected: translationOf(item, langCode) };
     return { id: `${item.word}-${index}`, type, item, prompt: item.sentence || `Use the word correctly: _____.`, expected: item.word };
   });
+}
+
+function wordsToEditableText(words, langCode) {
+  return words.map((item) => `${item.word} — ${translationOf(item, langCode)}`).join(NL);
 }
 
 function App() {
@@ -325,6 +450,12 @@ function App() {
     setTestSeed((seed) => seed + 1);
     setAnswers({});
     setTestChecked(false);
+  }
+
+  function handleEditWords() {
+    setInput(wordsToEditableText(words, targetLanguage));
+    setAutoMode(false);
+    setOutput("");
   }
 
   async function handleCopy() {
@@ -366,6 +497,7 @@ function App() {
             <div className="flex flex-wrap gap-2">
               <button onClick={() => setActiveTab("worksheet")}>Generate worksheet</button>
               <button onClick={() => setActiveTab("test")}>Generate test</button>
+              <button onClick={handleEditWords}>Edit words</button>
             </div>
           </div>
         </header>
@@ -413,6 +545,15 @@ function App() {
                   <option value="intoEnglish">Translate into English</option>
                   <option value="fromEnglish">Translate from English</option>
                   <option value="sentences">Make sentences</option>
+                  <option value="spelling">Spelling practice</option>
+                  <option value="definitions">Write definitions</option>
+                  <option value="questions">Personal questions</option>
+                  <option value="transformation">Sentence transformation</option>
+                  <option value="wordFormation">Word formation</option>
+                  <option value="collocations">Collocations</option>
+                  <option value="oddOneOut">Odd one out</option>
+                  <option value="miniStory">Mini story</option>
+                  <option value="mixedChallenge">Mixed challenge</option>
                 </select>
               </div>
             </div>
@@ -422,6 +563,16 @@ function App() {
                 <input type="checkbox" checked={showAnswers} onChange={(event) => setShowAnswers(event.target.checked)} className="w-auto" />
                 Show answer key in worksheet
               </label>
+            </div>
+
+            <div className="rounded-2xl border p-4">
+              <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+                <div>
+                  <strong>Edit words</strong>
+                  <p className="text-sm">Click this to turn the generated vocabulary into an editable list. Then you can write your own words.</p>
+                </div>
+                <button onClick={handleEditWords}>Edit current words</button>
+              </div>
             </div>
 
             <div className="rounded-2xl border p-4">
@@ -447,7 +598,7 @@ function App() {
               </div>
             ) : (
               <>
-                <label>Paste your own words here</label>
+                <label>Edit / paste your own words here</label>
                 <textarea value={input} onChange={(event) => setInput(event.target.value)} />
                 <p className="text-sm">Format: English word — translation/meaning. One word per line.</p>
               </>
