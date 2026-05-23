@@ -1339,7 +1339,82 @@ const WORD_BANK = [
   }
 ];
 
-const DEFAULT_INPUT = WORD_BANK.slice(7, 16).map((item) => `${item.word} — ${item.tr.ru}`).join(NL);
+
+function bankWord(level, topic, word, sentence, ru, kk, sv, de, es, fr, it, tr, uk, pl) {
+  return { level, topic, word, sentence, tr: { ru, kk, sv, de, es, fr, it, tr, uk, pl } };
+}
+
+const EXTRA_WORD_BANK = [
+  bankWord("A1", "Business", "shop", "The _____ is open today.", "магазин", "дүкен", "butik", "Geschäft", "tienda", "magasin", "negozio", "dükkan", "магазин", "sklep"),
+  bankWord("A1", "Business", "sell", "They _____ books in this shop.", "продавать", "сату", "sälja", "verkaufen", "vender", "vendre", "vendere", "satmak", "продавати", "sprzedawać"),
+  bankWord("A1", "Business", "buy", "I want to _____ a notebook.", "покупать", "сатып алу", "köpa", "kaufen", "comprar", "acheter", "comprare", "satın almak", "купувати", "kupować"),
+  bankWord("A1", "Business", "price", "What is the _____ of this pen?", "цена", "баға", "pris", "Preis", "precio", "prix", "prezzo", "fiyat", "ціна", "cena"),
+  bankWord("A1", "Business", "work", "My father goes to _____ every morning.", "работа", "жұмыс", "arbete", "Arbeit", "trabajo", "travail", "lavoro", "iş", "робота", "praca"),
+  bankWord("A1", "Finance", "money", "I need some _____ for the bus.", "деньги", "ақша", "pengar", "Geld", "dinero", "argent", "soldi", "para", "гроші", "pieniądze"),
+  bankWord("A1", "Finance", "coin", "I found a small _____ on the floor.", "монета", "тиын", "mynt", "Münze", "moneda", "pièce", "moneta", "bozuk para", "монета", "moneta"),
+  bankWord("A1", "Finance", "card", "Can I pay by _____?", "карта", "карта", "kort", "Karte", "tarjeta", "carte", "carta", "kart", "картка", "karta"),
+  bankWord("A1", "Finance", "pay", "I will _____ for the ticket.", "платить", "төлеу", "betala", "bezahlen", "pagar", "payer", "pagare", "ödemek", "платити", "płacić"),
+  bankWord("A1", "Finance", "bank", "The _____ is near the station.", "банк", "банк", "bank", "Bank", "banco", "banque", "banca", "banka", "банк", "bank"),
+
+  bankWord("A2", "Business", "customer", "The _____ asked for help.", "клиент", "клиент", "kund", "Kunde", "cliente", "client", "cliente", "müşteri", "клієнт", "klient"),
+  bankWord("A2", "Business", "order", "We need to prepare the _____.", "заказ", "тапсырыс", "beställning", "Bestellung", "pedido", "commande", "ordine", "sipariş", "замовлення", "zamówienie"),
+  bankWord("A2", "Business", "product", "This _____ is popular.", "продукт", "өнім", "produkt", "Produkt", "producto", "produit", "prodotto", "ürün", "продукт", "produkt"),
+  bankWord("A2", "Business", "service", "The hotel offers good _____.", "услуга", "қызмет", "service", "Dienstleistung", "servicio", "service", "servizio", "hizmet", "послуга", "usługa"),
+  bankWord("A2", "Business", "meeting", "We have a _____ at ten.", "встреча", "кездесу", "möte", "Treffen", "reunión", "réunion", "riunione", "toplantı", "зустріч", "spotkanie"),
+  bankWord("A2", "Finance", "save", "I try to _____ money every month.", "копить", "жинау", "spara", "sparen", "ahorrar", "économiser", "risparmiare", "biriktirmek", "заощаджувати", "oszczędzać"),
+  bankWord("A2", "Finance", "spend", "Do not _____ all your money.", "тратить", "жұмсау", "spendera", "ausgeben", "gastar", "dépenser", "spendere", "harcamak", "витрачати", "wydawać"),
+  bankWord("A2", "Finance", "cheap", "This bag is very _____.", "дешёвый", "арзан", "billig", "billig", "barato", "bon marché", "economico", "ucuz", "дешевий", "tani"),
+  bankWord("A2", "Finance", "expensive", "The phone is too _____.", "дорогой", "қымбат", "dyr", "teuer", "caro", "cher", "costoso", "pahalı", "дорогий", "drogi"),
+  bankWord("A2", "Finance", "bill", "The restaurant _____ was high.", "счёт", "шот", "räkning", "Rechnung", "cuenta", "addition", "conto", "hesap", "рахунок", "rachunek"),
+
+  bankWord("B1", "Business", "manager", "The _____ explained the plan.", "менеджер", "менеджер", "chef", "Manager", "gerente", "responsable", "manager", "yönetici", "менеджер", "menedżer"),
+  bankWord("B1", "Business", "deadline", "We must finish before the _____.", "крайний срок", "соңғы мерзім", "deadline", "Frist", "plazo", "date limite", "scadenza", "son tarih", "дедлайн", "termin"),
+  bankWord("B1", "Business", "client", "The _____ wants a clear answer.", "клиент", "клиент", "kund", "Kunde", "cliente", "client", "cliente", "müşteri", "клієнт", "klient"),
+  bankWord("B1", "Business", "project", "This _____ needs teamwork.", "проект", "жоба", "projekt", "Projekt", "proyecto", "projet", "progetto", "proje", "проєкт", "projekt"),
+  bankWord("B1", "Business", "agreement", "They signed an _____.", "соглашение", "келісім", "avtal", "Vereinbarung", "acuerdo", "accord", "accordo", "anlaşma", "угода", "umowa"),
+  bankWord("B1", "Finance", "budget", "The family made a monthly _____.", "бюджет", "бюджет", "budget", "Budget", "presupuesto", "budget", "bilancio", "bütçe", "бюджет", "budżet"),
+  bankWord("B1", "Finance", "income", "Her monthly _____ increased.", "доход", "табыс", "inkomst", "Einkommen", "ingresos", "revenu", "reddito", "gelir", "дохід", "dochód"),
+  bankWord("B1", "Finance", "expense", "Rent is my biggest _____.", "расход", "шығын", "utgift", "Ausgabe", "gasto", "dépense", "spesa", "gider", "витрата", "wydatek"),
+  bankWord("B1", "Finance", "profit", "The company made a _____.", "прибыль", "пайда", "vinst", "Gewinn", "beneficio", "profit", "profitto", "kâr", "прибуток", "zysk"),
+  bankWord("B1", "Finance", "debt", "He wants to pay off his _____.", "долг", "қарыз", "skuld", "Schuld", "deuda", "dette", "debito", "borç", "борг", "dług"),
+
+  bankWord("B2", "Business", "negotiate", "They will _____ the contract tomorrow.", "вести переговоры", "келіссөз жүргізу", "förhandla", "verhandeln", "negociar", "négocier", "negoziare", "müzakere etmek", "вести переговори", "negocjować"),
+  bankWord("B2", "Business", "strategy", "The team needs a clear _____.", "стратегия", "стратегия", "strategi", "Strategie", "estrategia", "stratégie", "strategia", "strateji", "стратегія", "strategia"),
+  bankWord("B2", "Business", "responsibility", "She took _____ for the result.", "ответственность", "жауапкершілік", "ansvar", "Verantwortung", "responsabilidad", "responsabilité", "responsabilità", "sorumluluk", "відповідальність", "odpowiedzialność"),
+  bankWord("B2", "Business", "proposal", "His _____ was practical.", "предложение", "ұсыныс", "förslag", "Vorschlag", "propuesta", "proposition", "proposta", "teklif", "пропозиція", "propozycja"),
+  bankWord("B2", "Business", "risk", "Every decision has some _____.", "риск", "тәуекел", "risk", "Risiko", "riesgo", "risque", "rischio", "risk", "ризик", "ryzyko"),
+  bankWord("B2", "Finance", "investment", "The _____ may grow over time.", "инвестиция", "инвестиция", "investering", "Investition", "inversión", "investissement", "investimento", "yatırım", "інвестиція", "inwestycja"),
+  bankWord("B2", "Finance", "revenue", "The company increased its _____.", "выручка", "түсім", "intäkter", "Umsatz", "ingresos", "chiffre d’affaires", "ricavi", "gelir", "виручка", "przychód"),
+  bankWord("B2", "Finance", "cash flow", "Healthy _____ is important for survival.", "денежный поток", "ақша ағыны", "kassaflöde", "Cashflow", "flujo de caja", "flux de trésorerie", "flusso di cassa", "nakit akışı", "грошовий потік", "przepływ gotówki"),
+  bankWord("B2", "Finance", "loan", "The bank approved the _____.", "кредит", "несие", "lån", "Kredit", "préstamo", "prêt", "prestito", "kredi", "кредит", "pożyczka"),
+  bankWord("B2", "Finance", "asset", "The building is a valuable _____.", "актив", "актив", "tillgång", "Vermögenswert", "activo", "actif", "bene", "varlık", "актив", "aktywo"),
+
+  bankWord("C1", "Business", "stakeholder", "Every _____ has different priorities.", "заинтересованная сторона", "мүдделі тарап", "intressent", "Stakeholder", "parte interesada", "partie prenante", "parte interessata", "paydaş", "зацікавлена сторона", "interesariusz"),
+  bankWord("C1", "Business", "leverage", "The firm can _____ its network.", "использовать как преимущество", "тиімді пайдалану", "utnyttja", "nutzen", "aprovechar", "exploiter", "sfruttare", "kaldıraç olarak kullanmak", "використати", "wykorzystać"),
+  bankWord("C1", "Business", "implementation", "The _____ stage was difficult.", "внедрение", "іске асыру", "genomförande", "Umsetzung", "implementación", "mise en œuvre", "attuazione", "uygulama", "впровадження", "wdrożenie"),
+  bankWord("C1", "Business", "competitive advantage", "Speed became their _____.", "конкурентное преимущество", "бәсекелік артықшылық", "konkurrensfördel", "Wettbewerbsvorteil", "ventaja competitiva", "avantage concurrentiel", "vantaggio competitivo", "rekabet avantajı", "конкурентна перевага", "przewaga konkurencyjna"),
+  bankWord("C1", "Business", "scalable", "The model is _____.", "масштабируемый", "масштабталатын", "skalbar", "skalierbar", "escalable", "évolutif", "scalabile", "ölçeklenebilir", "масштабований", "skalowalny"),
+  bankWord("C1", "Finance", "liquidity", "The firm needs enough _____.", "ликвидность", "өтімділік", "likviditet", "Liquidität", "liquidez", "liquidité", "liquidità", "likidite", "ліквідність", "płynność"),
+  bankWord("C1", "Finance", "forecast", "The analyst updated the _____.", "прогноз", "болжам", "prognos", "Prognose", "pronóstico", "prévision", "previsione", "tahmin", "прогноз", "prognoza"),
+  bankWord("C1", "Finance", "valuation", "The _____ seemed too optimistic.", "оценка стоимости", "бағалау", "värdering", "Bewertung", "valoración", "valorisation", "valutazione", "değerleme", "оцінка вартості", "wycena"),
+  bankWord("C1", "Finance", "margin", "The profit _____ improved.", "маржа", "маржа", "marginal", "Marge", "margen", "marge", "margine", "marj", "маржа", "marża"),
+  bankWord("C1", "Finance", "return", "Investors expect a strong _____.", "доходность", "қайтарым", "avkastning", "Rendite", "rendimiento", "rendement", "rendimento", "getiri", "дохідність", "zwrot"),
+
+  bankWord("C2", "Business", "due diligence", "The acquisition requires careful _____.", "комплексная проверка", "жан-жақты тексеру", "företagsbesiktning", "Due Diligence", "diligencia debida", "audit préalable", "due diligence", "durum tespiti", "належна перевірка", "due diligence"),
+  bankWord("C2", "Business", "strategic alignment", "The board questioned the _____.", "стратегическое соответствие", "стратегиялық сәйкестік", "strategisk anpassning", "strategische Ausrichtung", "alineación estratégica", "alignement stratégique", "allineamento strategico", "stratejik uyum", "стратегічне узгодження", "zgodność strategiczna"),
+  bankWord("C2", "Business", "operational resilience", "The crisis tested their _____.", "операционная устойчивость", "операциялық тұрақтылық", "operativ motståndskraft", "operative Resilienz", "resiliencia operativa", "résilience opérationnelle", "resilienza operativa", "operasyonel dayanıklılık", "операційна стійкість", "odporność operacyjna"),
+  bankWord("C2", "Business", "governance", "Weak _____ can destroy trust.", "корпоративное управление", "басқару", "styrning", "Governance", "gobernanza", "gouvernance", "governance", "yönetişim", "врядування", "ład korporacyjny"),
+  bankWord("C2", "Business", "market positioning", "Their _____ was deliberately premium.", "позиционирование на рынке", "нарықтағы орны", "marknadspositionering", "Marktpositionierung", "posicionamiento de mercado", "positionnement sur le marché", "posizionamento di mercato", "pazar konumlandırması", "ринкове позиціонування", "pozycjonowanie rynkowe"),
+  bankWord("C2", "Finance", "capital allocation", "Poor _____ limits long-term growth.", "распределение капитала", "капитал бөлу", "kapitalallokering", "Kapitalallokation", "asignación de capital", "allocation du capital", "allocazione del capitale", "sermaye tahsisi", "розподіл капіталу", "alokacja kapitału"),
+  bankWord("C2", "Finance", "leverage ratio", "The _____ worried investors.", "коэффициент финансового рычага", "левередж коэффициенті", "skuldsättningsgrad", "Verschuldungsgrad", "ratio de apalancamiento", "ratio d’endettement", "rapporto di leva", "kaldıraç oranı", "коефіцієнт левериджу", "wskaźnik dźwigni"),
+  bankWord("C2", "Finance", "working capital", "The CFO improved _____.", "оборотный капитал", "айналым капиталы", "rörelsekapital", "Working Capital", "capital de trabajo", "fonds de roulement", "capitale circolante", "işletme sermayesi", "оборотний капітал", "kapitał obrotowy"),
+  bankWord("C2", "Finance", "impairment", "The asset faced an _____ charge.", "обесценение", "құнсыздану", "nedskrivning", "Wertminderung", "deterioro", "dépréciation", "svalutazione", "değer düşüklüğü", "знецінення", "utrata wartości"),
+  bankWord("C2", "Finance", "fiduciary duty", "Directors have a _____.", "фидуциарная обязанность", "сенімгерлік міндет", "förvaltaransvar", "Treuepflicht", "deber fiduciario", "devoir fiduciaire", "dovere fiduciario", "mütevelli yükümlülüğü", "фідуціарний обов’язок", "obowiązek powierniczy")
+];
+
+const COMPLETE_WORD_BANK = [...WORD_BANK, ...EXTRA_WORD_BANK];
+
+const DEFAULT_INPUT = COMPLETE_WORD_BANK.slice(7, 16).map((item) => `${item.word} — ${item.tr.ru}`).join(NL);
 
 function languageByCode(code) {
   return LANGUAGES.find((lang) => lang.code === code) || LANGUAGES[0];
@@ -1385,19 +1460,45 @@ function shuffle(items) {
   return result;
 }
 
-function pickAutoWords(level, topic, count) {
+function seededShuffle(items, seed = 1) {
+  const result = [...items];
+  let value = Number(seed) || 1;
+  function random() {
+    value = (value * 9301 + 49297) % 233280;
+    return value / 233280;
+  }
+  for (let i = result.length - 1; i > 0; i = i - 1) {
+    const j = Math.floor(random() * (i + 1));
+    const temp = result[i];
+    result[i] = result[j];
+    result[j] = temp;
+  }
+  return result;
+}
+
+function pickAutoWords(level, topic, count, seed = 1) {
   const needed = Math.max(3, Math.min(Number(count) || 10, 18));
 
   let levelPool = level === "Mixed"
-    ? [...WORD_BANK]
-    : WORD_BANK.filter((item) => item.level === level);
+    ? [...COMPLETE_WORD_BANK]
+    : COMPLETE_WORD_BANK.filter((item) => item.level === level);
 
   if (topic !== "Any topic") {
-    const topicPool = levelPool.filter((item) => item.topic === topic);
-    if (topicPool.length > 0) levelPool = topicPool;
+    const exactTopicPool = levelPool.filter((item) => item.topic === topic);
+    const sameTopicAllLevels = COMPLETE_WORD_BANK.filter((item) => item.topic === topic);
+
+    if (exactTopicPool.length >= needed) {
+      levelPool = exactTopicPool;
+    } else if (exactTopicPool.length > 0) {
+      const filler = levelPool.filter((item) => item.topic !== topic);
+      levelPool = [...exactTopicPool, ...filler];
+    } else if (sameTopicAllLevels.length > 0) {
+      levelPool = sameTopicAllLevels;
+    }
   }
 
-  return shuffle(levelPool).slice(0, Math.min(needed, levelPool.length));
+  const shuffled = seededShuffle(levelPool, seed);
+  return shuffled.slice(0, Math.min(needed, shuffled.length));
 }
 
 function fileName(title) {
@@ -1739,7 +1840,17 @@ function levelParagraphCount(level) {
   return 4;
 }
 
-function readingTitle(level) {
+function readingTitle(level, topic = "General") {
+  if (topic === "Finance") {
+    if (level === "A1" || level === "A2") return "Money in Everyday Life";
+    if (level === "B1" || level === "B2") return "Managing Money and Making Financial Choices";
+    return "Financial Strategy and Long-Term Value";
+  }
+  if (topic === "Business") {
+    if (level === "A1" || level === "A2") return "A Small Shop and Its Customers";
+    if (level === "B1" || level === "B2") return "A Team Project at Work";
+    return "Business Strategy and Competitive Advantage";
+  }
   if (level === "A1") return "A Simple Day";
   if (level === "A2") return "A Useful School Project";
   if (level === "B1") return "Learning New Skills";
@@ -1751,21 +1862,23 @@ function readingTitle(level) {
 function buildReadingText(words, level) {
   const selected = words.slice(0, Math.min(words.length, 10));
   const paragraphs = [];
-  const title = readingTitle(level);
+  const topic = selected[0]?.topic || "General";
+  const title = readingTitle(level, topic);
   const simple = level === "A1" || level === "A2";
   const medium = level === "B1" || level === "B2";
   const count = levelParagraphCount(level);
+  const topicFrame = topic === "Finance" ? "financial decision" : topic === "Business" ? "business situation" : "learning situation";
 
   for (let i = 0; i < count; i += 1) {
     const a = selected[(i * 3) % selected.length]?.word || "skill";
     const b = selected[(i * 3 + 1) % selected.length]?.word || "decision";
     const c = selected[(i * 3 + 2) % selected.length]?.word || "experience";
     if (simple) {
-      paragraphs.push(`Paragraph ${i + 1}. This text is about ${a}, ${b}, and ${c}. The student sees the words in a clear situation. The story is short, so it is easy to read and understand. Each word helps the student remember the meaning and use it in a sentence.`);
+      paragraphs.push(`Paragraph ${i + 1}. This text is about ${a}, ${b}, and ${c} in a ${topicFrame}. The student sees the words in a clear situation. The story is short, so it is easy to read and understand. Each word helps the student remember the meaning and use it in a sentence.`);
     } else if (medium) {
-      paragraphs.push(`Paragraph ${i + 1}. During the project, the learners had to think carefully about ${a}. At first, they did not fully understand how ${b} could affect the result. After a short discussion, they connected the idea with their own ${c} and became more confident using the vocabulary in context.`);
+      paragraphs.push(`Paragraph ${i + 1}. During the ${topicFrame}, the learners had to think carefully about ${a}. At first, they did not fully understand how ${b} could affect the result. After a short discussion, they connected the idea with their own ${c} and became more confident using the vocabulary in context.`);
     } else {
-      paragraphs.push(`Paragraph ${i + 1}. The discussion revealed that ${a} was not merely an isolated term, but part of a wider conceptual pattern. When the group examined ${b}, they noticed how easily a superficial interpretation could distort the final judgement. By connecting the concept to ${c}, they developed a more precise and defensible understanding of the topic.`);
+      paragraphs.push(`Paragraph ${i + 1}. The ${topicFrame} revealed that ${a} was not merely an isolated term, but part of a wider conceptual pattern. When the group examined ${b}, they noticed how easily a superficial interpretation could distort the final judgement. By connecting the concept to ${c}, they developed a more precise and defensible understanding of the topic.`);
     }
   }
 
@@ -2005,11 +2118,11 @@ function App() {
   const [testChecked, setTestChecked] = useState(false);
 
   const customWords = useMemo(() => parseWords(input), [input]);
-  const autoWords = useMemo(() => pickAutoWords(level, topic, Number(wordCount) || 10), [level, topic, wordCount, generationSeed]);
+  const autoWords = useMemo(() => pickAutoWords(level, topic, Number(wordCount) || 10, generationSeed), [level, topic, wordCount, generationSeed]);
   const words = autoMode ? autoWords : customWords;
   const settings = { title, level, format, targetLanguage, exerciseType, autoMode, showAnswers };
   const generatedText = buildWorksheet(words, settings);
-  const levelTopics = level === "Mixed" ? WORD_BANK : WORD_BANK.filter((item) => item.level === level);
+  const levelTopics = level === "Mixed" ? COMPLETE_WORD_BANK : COMPLETE_WORD_BANK.filter((item) => item.level === level);
   const topics = ["Any topic", ...Array.from(new Set(levelTopics.map((item) => item.topic))).sort()];
   const selectedLang = languageByCode(targetLanguage);
   const testQuestions = useMemo(() => buildTestQuestions(words, targetLanguage), [words, targetLanguage, testSeed]);
