@@ -90,6 +90,50 @@ const FALLBACK_TRANSLATIONS = {
   Spanish: "traducción", French: "traduction", Italian: "traduzione", Turkish: "çeviri", Ukrainian: "переклад", Polish: "tłumaczenie", Portuguese: "tradução", Chinese: "翻译", Japanese: "翻訳", Korean: "번역", Arabic: "ترجمة", Hindi: "अनुवाद"
 };
 
+const COMMON_SINGLE_WORDS = {
+  "привет": { word: "hello", meaning: "привет" },
+  "пока": { word: "goodbye", meaning: "пока" },
+  "спасибо": { word: "thank you", meaning: "спасибо" },
+  "пожалуйста": { word: "please", meaning: "пожалуйста" },
+  "дом": { word: "house", meaning: "дом" },
+  "школа": { word: "school", meaning: "школа" },
+  "работа": { word: "work", meaning: "работа" },
+  "деньги": { word: "money", meaning: "деньги" },
+  "бизнес": { word: "business", meaning: "бизнес" },
+  "цель": { word: "goal", meaning: "цель" },
+  "прибыль": { word: "profit", meaning: "прибыль" },
+  "бюджет": { word: "budget", meaning: "бюджет" },
+  "инвестиция": { word: "investment", meaning: "инвестиция" },
+  "клиент": { word: "client", meaning: "клиент" },
+  "стратегия": { word: "strategy", meaning: "стратегия" },
+  "ответственность": { word: "responsibility", meaning: "ответственность" },
+  "решение": { word: "decision", meaning: "решение" },
+  "путешествие": { word: "journey", meaning: "путешествие" },
+  "улучшать": { word: "improve", meaning: "улучшать" },
+  "опыт": { word: "experience", meaning: "опыт" },
+  "сәлем": { word: "hello", meaning: "сәлем" },
+  "рахмет": { word: "thank you", meaning: "рахмет" },
+  "үй": { word: "house", meaning: "үй" },
+  "мектеп": { word: "school", meaning: "мектеп" },
+  "ақша": { word: "money", meaning: "ақша" },
+  "жұмыс": { word: "work", meaning: "жұмыс" }
+};
+
+function inferSingleWord(line) {
+  const clean = String(line || "").trim().toLowerCase();
+  if (COMMON_SINGLE_WORDS[clean]) return COMMON_SINGLE_WORDS[clean];
+
+  // If the user writes only an English word, keep it as the word and make a useful placeholder.
+  if (/^[a-zA-Z][a-zA-Z\s'-]*$/.test(clean)) {
+    return { word: line.trim(), meaning: "add translation / meaning" };
+  }
+
+  // If the user writes only a Russian/Kazakh/other word, we cannot translate every possible word without an API.
+  // Keep it visible and ask for a translation instead of deleting it.
+  return { word: line.trim(), meaning: "add English word or translation" };
+}
+
+
 function parseEntry(entry, language) {
   const parts = entry.split("|");
   const word = parts[0] || "word";
@@ -124,17 +168,25 @@ function shuffle(items) {
 }
 
 function parseCustomWords(text) {
-  return text
+  return String(text || "")
+    .replace(/\\n/g, "\n")
     .split(/\n+/)
     .map((line) => line.trim())
     .filter(Boolean)
     .map((line) => {
-      const divider = line.includes("—") ? "—" : line.includes("-") ? "-" : ":";
+      const divider = line.includes("—") ? "—" : line.includes(" - ") ? " - " : line.includes(":") ? ":" : null;
+      if (!divider) return inferSingleWord(line);
+
       const parts = line.split(divider);
-      const word = (parts[0] || "").trim();
-      const meaning = parts.slice(1).join(" — ").trim() || "write the meaning";
-      return { word, meaning };
+      const left = (parts[0] || "").trim();
+      const right = parts.slice(1).join(" — ").trim();
+
+      if (!left && !right) return null;
+      if (!right) return inferSingleWord(left);
+
+      return { word: left, meaning: right };
     })
+    .filter(Boolean)
     .filter((item) => item.word);
 }
 
@@ -167,6 +219,7 @@ function header(title, level, topic, language, format) {
 }
 
 function vocabularyList(words) {
+  if (!words.length) return ["VOCABULARY LIST", "", "Add words first. Best format: English word — translation.", ""].join(NL);
   return ["VOCABULARY LIST", "", ...words.map((item, i) => `${i + 1}. ${item.word} — ${item.meaning}`), ""].join(NL);
 }
 
@@ -416,7 +469,7 @@ function App() {
   const [seed, setSeed] = useState(0);
 
   const words = useMemo(() => {
-    if (manual) return uniqueWords(parseCustomWords(customText)).slice(0, count);
+    if (manual) return uniqueWords(parseCustomWords(customText));
     const generated = uniqueWords(topicWords(level, topic, language));
     const rotated = [...generated.slice(seed % Math.max(1, generated.length)), ...generated.slice(0, seed % Math.max(1, generated.length))];
     return rotated.slice(0, count);
@@ -442,12 +495,23 @@ function App() {
   }
 
   function startEditingCurrentWords() {
-    setCustomText(wordsToEditableText(words));
+    setCustomText((current) => current.trim() ? current : wordsToEditableText(words));
     setManual(true);
   }
 
   function useAutomaticWords() {
     setManual(false);
+    setSeed((s) => s + 1);
+  }
+
+  function handleRegenerateWords() {
+    // In manual mode this must NOT delete or replace the user's words.
+    // It only refreshes the generated tasks that are built from the same words.
+    if (manual) {
+      setChecked(false);
+      setAnswers({});
+      return;
+    }
     setSeed((s) => s + 1);
   }
 
@@ -479,8 +543,16 @@ function App() {
           </div>
           <label>Material format<select value={format} onChange={(e) => setFormat(e.target.value)}>{FORMATS.map((f) => <option key={f.value} value={f.value}>{f.label}</option>)}</select></label>
           <label>Exercise type<select value={taskType} onChange={(e) => setTaskType(e.target.value)}>{TASK_TYPES.map((t) => <option key={t.value} value={t.value}>{t.label}</option>)}</select></label>
-          <div className="button-row"><button onClick={() => setSeed((s) => s + 1)}>Regenerate words</button><button className="secondary-button" onClick={() => setManual((m) => !m)}>{manual ? "Use automatic words" : "Edit current words"}</button></div>
-          {manual && <label>Edit words<textarea value={customText} onChange={(e) => setCustomText(e.target.value)} placeholder="word — translation\nstrategy — стратегия\nbudget — бюджет" /></label>}
+          <div className="button-row">
+            <button onClick={handleRegenerateWords}>{manual ? "Update tasks from my words" : "Regenerate words"}</button>
+            <button className="secondary-button" onClick={manual ? useAutomaticWords : startEditingCurrentWords}>{manual ? "Use automatic words" : "Edit current words"}</button>
+          </div>
+          {manual && (
+            <>
+              <p className="helper-note">Your words will not be deleted. Best format: English word — translation. If you write only one unknown word, the site will keep it, but it cannot translate every word without an AI API.</p>
+              <label>Edit words<textarea value={customText} onChange={(e) => setCustomText(e.target.value)} placeholder={"strategy — стратегия\nbudget — бюджет\ninvestment — инвестиция"} /></label>
+            </>
+          )}
           {!manual && <div className="word-preview"><h3>Current words</h3>{words.map((w) => <span key={w.word}>{w.word} — {w.meaning}</span>)}</div>}
         </section>
 
