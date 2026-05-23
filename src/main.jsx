@@ -2097,6 +2097,95 @@ function wordsToEditableText(words, langCode) {
   return words.map((item) => `${item.word} — ${translationOf(item, langCode)}`).join(NL);
 }
 
+
+const CONTACT_EMAIL = "ksam54041@gmai.com";
+
+const LEGAL_SECTIONS = {
+  privacy: {
+    title: "Privacy Policy",
+    body: [
+      "A1ZIV is a browser-based learning tool for generating vocabulary worksheets, readings, grammar practice, listening scripts, and interactive tests.",
+      "This website does not require registration, does not ask for your name, email address, payment details, school details, or account password, and does not intentionally collect personal data.",
+      "The words, answers, settings, and test results you type or generate are processed in your browser for the purpose of creating learning materials. Do not paste private, sensitive, confidential, medical, financial, or legally protected information into the generator.",
+      "The site is hosted on Vercel. Basic technical data, such as IP address, browser information, device information, pages visited, and request logs may be processed by the hosting provider for security, performance, abuse prevention, and service operation.",
+      "This website currently does not use user accounts, payment processing, advertising cookies, tracking pixels, newsletters, or third-party analytics inside the app code.",
+      "If analytics, accounts, payments, AI APIs, contact forms, or advertising are added later, this policy should be updated before those features are made public."
+    ]
+  },
+  terms: {
+    title: "Terms of Use",
+    body: [
+      "By using A1ZIV, you agree to use the website only for lawful educational purposes.",
+      "The generated materials are provided for study support, lesson preparation, and vocabulary practice. The site does not guarantee that every generated translation, answer key, grammar item, reading text, or test score is perfect.",
+      "Teachers, students, and users should review all generated materials before using them in class, exams, paid lessons, or official assessment.",
+      "You are responsible for the content you paste into the website and for how you use downloaded materials.",
+      "You must not use the website to create harmful, illegal, abusive, discriminatory, sexually explicit, or copyright-infringing materials.",
+      "A1ZIV may be changed, updated, paused, or removed at any time while the project is under development."
+    ]
+  },
+  disclaimer: {
+    title: "Educational Disclaimer",
+    body: [
+      "A1ZIV is an educational support tool, not a certified exam board, official language assessment provider, school, university, legal adviser, or professional translator.",
+      "Level labels such as A1, A2, B1, B2, C1, and C2 are used as practical learning categories. They are not official certification results.",
+      "Interactive test scores are practice scores only. They should not be treated as official exam results or proof of language level.",
+      "Built-in translations are strongest for the supported language pairs shown on the website. For important work, check translations with a qualified teacher, native speaker, or reliable dictionary.",
+      "Reading, grammar, listening, writing, finance, business, and other generated tasks are for learning practice and may need human editing."
+    ]
+  },
+  cookies: {
+    title: "Cookie Notice",
+    body: [
+      "The current A1ZIV app code does not intentionally set advertising cookies, analytics cookies, or marketing trackers.",
+      "The hosting platform may use essential technical cookies, local browser mechanisms, or server logs to keep the website secure, available, and functional.",
+      "If future versions add analytics, login, payments, saved progress, or advertising, this cookie notice should be updated and, where required, a consent banner should be added."
+    ]
+  },
+  copyright: {
+    title: "Copyright and Content Notice",
+    body: [
+      "A1ZIV interface, project structure, and original generated-template logic are protected as project content unless otherwise stated.",
+      "Users may download and use generated worksheets for personal study, classroom practice, and tutoring materials, but they are responsible for checking the accuracy and legality of the final content.",
+      "Do not upload or paste copyrighted textbook pages, paid course content, private school materials, or third-party materials unless you have the right to use them.",
+      "Project copyright notice: © 2026 A1ZIV / Alexandr Balyuba. All rights reserved."
+    ]
+  },
+  contact: {
+    title: "Contact",
+    body: [
+      "For questions about the website, corrections, takedown requests, privacy questions, or content issues, contact the project owner.",
+      "Email: ksam54041@gmai.com",
+      "When contacting, include the website link, the issue, and a short explanation of what should be corrected or removed."
+    ]
+  }
+};
+
+function LegalModal({ sectionKey, onClose }) {
+  if (!sectionKey) return null;
+  const section = LEGAL_SECTIONS[sectionKey];
+  if (!section) return null;
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4">
+      <div className="max-h-[85vh] w-full max-w-3xl overflow-auto rounded-3xl border bg-slate-950 p-6 shadow-2xl">
+        <div className="mb-4 flex items-start justify-between gap-4">
+          <div>
+            <p className="text-sm font-semibold text-sky-300">A1ZIV legal information</p>
+            <h2 className="text-2xl font-black">{section.title}</h2>
+          </div>
+          <button onClick={onClose}>Close</button>
+        </div>
+        <div className="space-y-4 text-sm leading-7 text-slate-200">
+          {section.body.map((paragraph, index) => <p key={index}>{paragraph}</p>)}
+        </div>
+        <div className="mt-6 rounded-2xl border p-4 text-sm text-slate-300">
+          Last updated: 2026. This text is a practical website policy template, not legal advice. Before using the site commercially, review it with a qualified legal professional for your country and target users.
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function App() {
   const [activeTab, setActiveTab] = useState("worksheet");
   const [input, setInput] = useState(DEFAULT_INPUT);
@@ -2116,6 +2205,11 @@ function App() {
   const [testSeed, setTestSeed] = useState(1);
   const [answers, setAnswers] = useState({});
   const [testChecked, setTestChecked] = useState(false);
+  const [legalOpen, setLegalOpen] = useState(null);
+  const [feedbackType, setFeedbackType] = useState("Suggestion");
+  const [feedbackText, setFeedbackText] = useState("");
+  const [rating, setRating] = useState(5);
+  const [feedbackSent, setFeedbackSent] = useState(false);
 
   const customWords = useMemo(() => parseWords(input), [input]);
   const autoWords = useMemo(() => pickAutoWords(level, topic, Number(wordCount) || 10, generationSeed), [level, topic, wordCount, generationSeed]);
@@ -2203,6 +2297,28 @@ function App() {
   function updateAnswer(id, value) {
     setAnswers((current) => ({ ...current, [id]: value }));
   }
+
+  function handleSendFeedback() {
+    const message = feedbackText.trim();
+    if (!message) {
+      alert("Please write your suggestion, complaint, or feedback first.");
+      return;
+    }
+    const subject = encodeURIComponent(`A1ZIV feedback: ${feedbackType} (${rating}/5 stars)`);
+    const body = encodeURIComponent([
+      "A1ZIV website feedback",
+      "",
+      `Type: ${feedbackType}`,
+      `Rating: ${rating}/5`,
+      `Page: ${window.location.href}`,
+      "",
+      "Message:",
+      message
+    ].join(NL));
+    window.location.href = `mailto:${CONTACT_EMAIL}?subject=${subject}&body=${body}`;
+    setFeedbackSent(true);
+  }
+
 
   return (
     <div className="min-h-screen p-4 md:p-8">
@@ -2400,6 +2516,78 @@ function App() {
             </section>
           )}
         </main>
+
+
+        <section className="rounded-3xl border p-6 shadow-sm">
+          <div className="grid gap-6 md:grid-cols-[1fr_1.2fr] md:items-start">
+            <div>
+              <p className="mb-2 text-sm font-semibold text-sky-300">Feedback</p>
+              <h2 className="text-2xl font-black">Rate A1ZIV</h2>
+              <p className="mt-2 text-sm">Leave a suggestion, complaint, bug report, or improvement idea. This helps improve the learning generator.</p>
+              <div className="mt-4 flex gap-2" aria-label="Rate this website from 1 to 5 stars">
+                {[1, 2, 3, 4, 5].map((star) => (
+                  <button
+                    key={star}
+                    type="button"
+                    onClick={() => setRating(star)}
+                    className="min-w-[46px] px-3 py-2 text-xl"
+                    title={`${star} star${star === 1 ? "" : "s"}`}
+                  >
+                    {star <= rating ? "★" : "☆"}
+                  </button>
+                ))}
+              </div>
+              <p className="mt-2 text-sm font-semibold">Your rating: {rating} / 5</p>
+            </div>
+            <div className="space-y-4">
+              <div>
+                <label>Feedback type</label>
+                <select value={feedbackType} onChange={(event) => setFeedbackType(event.target.value)}>
+                  <option value="Suggestion">Suggestion</option>
+                  <option value="Complaint">Complaint</option>
+                  <option value="Bug report">Bug report</option>
+                  <option value="Feature request">Feature request</option>
+                  <option value="Translation correction">Translation correction</option>
+                  <option value="General review">General review</option>
+                </select>
+              </div>
+              <div>
+                <label>Your message</label>
+                <textarea
+                  value={feedbackText}
+                  onChange={(event) => setFeedbackText(event.target.value)}
+                  placeholder="Write what should be improved, what is wrong, or what feature you want next..."
+                />
+              </div>
+              <div className="flex flex-wrap items-center gap-3">
+                <button onClick={handleSendFeedback}>Send feedback by email</button>
+                <span className="text-sm">Contact: {CONTACT_EMAIL}</span>
+              </div>
+              {feedbackSent && <p className="rounded-2xl border p-3 text-sm">Your email app should open with the feedback prepared. Send it from your email to finish.</p>}
+              <p className="text-xs">This version does not store reviews in a database. It prepares an email so feedback can be sent officially to the project contact address.</p>
+            </div>
+          </div>
+        </section>
+
+        <footer className="rounded-3xl border p-6 shadow-sm">
+          <div className="grid gap-4 md:grid-cols-[1.4fr_1fr] md:items-start">
+            <div>
+              <h2 className="text-xl font-bold">A1ZIV</h2>
+              <p className="mt-2 text-sm">Educational vocabulary, reading, grammar, writing, listening, and test generator. Use generated materials for practice and review them before official or paid use.</p>
+              <p className="mt-3 text-xs">© 2026 A1ZIV / Alexandr Balyuba. All rights reserved.</p>
+            </div>
+            <div className="flex flex-wrap gap-2 md:justify-end">
+              <button onClick={() => setLegalOpen("privacy")}>Privacy Policy</button>
+              <button onClick={() => setLegalOpen("terms")}>Terms of Use</button>
+              <button onClick={() => setLegalOpen("disclaimer")}>Disclaimer</button>
+              <button onClick={() => setLegalOpen("cookies")}>Cookies</button>
+              <button onClick={() => setLegalOpen("copyright")}>Copyright</button>
+              <button onClick={() => setLegalOpen("contact")}>Contact</button>
+            </div>
+          </div>
+        </footer>
+
+        <LegalModal sectionKey={legalOpen} onClose={() => setLegalOpen(null)} />
       </div>
     </div>
   );
