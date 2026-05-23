@@ -1495,11 +1495,120 @@ function speakingPractice(words, level) {
   return lines.join(NL);
 }
 
-function dialoguePractice(words, level) {
+function dialogueScenario(level) {
+  if (level === "A1" || level === "A2") return "Two classmates are talking after school.";
+  if (level === "B1") return "Two students are planning a small class project.";
+  if (level === "B2") return "Two colleagues are preparing for a meeting.";
+  if (level === "C1") return "Two team members are discussing a difficult decision.";
+  return "Two senior colleagues are discussing a complex professional situation.";
+}
+
+function readyDialogue(words, level) {
+  const selected = words.slice(0, 10);
+  const lines = [
+    "READY DIALOGUE",
+    `Scenario: ${dialogueScenario(level)}`,
+    "",
+    "A: We need to talk about this situation carefully. It may affect the whole project.",
+    `B: I agree. The first problem is ${selected[0]?.word || "the main issue"}, and we cannot ignore it.`,
+    `A: Yes, but we also need a clear ${selected[1]?.word || "plan"} before we make a decision.`,
+    `B: True. If we make an ${selected[2]?.word || "assumption"} too quickly, we may choose the wrong solution.`,
+    `A: That is why I want us to ${selected[3]?.word || "evaluate"} the facts first.`,
+    `B: Good point. The details are quite ${selected[4]?.word || "important"}, so we should not rush.`,
+    `A: Also, ${selected[5]?.word || "communication"} with the other team will be important.`,
+    `B: Exactly. We need to ${selected[6]?.word || "negotiate"} calmly and explain our position clearly.`,
+    `A: If we do that, we can avoid a serious ${selected[7]?.word || "problem"}.`,
+    `B: I agree. Let's prepare our ideas and then speak to them tomorrow.`
+  ];
+  return lines.join(NL);
+}
+
+function gappedDialogue(words, level, showAnswers = true) {
+  const selected = words.slice(0, 8);
+  const lines = [
+    "DIALOGUE EXERCISE: Fill in the missing words.",
+    "Use the vocabulary list before the dialogue.",
+    "",
+    "A: We need to talk about this situation carefully. It may affect the whole project.",
+    "B: I agree. The first problem is _____, and we cannot ignore it.",
+    "A: Yes, but we also need a clear _____ before we make a decision.",
+    "B: True. If we make an _____ too quickly, we may choose the wrong solution.",
+    "A: That is why I want us to _____ the facts first.",
+    "B: Good point. The details are quite _____, so we should not rush.",
+    "A: Also, _____ with the other team will be important.",
+    "B: Exactly. We need to _____ calmly and explain our position clearly.",
+    "A: If we do that, we can avoid a serious _____."
+  ];
+  if (showAnswers) {
+    lines.push("", "Answer Key:");
+    selected.forEach((item, index) => lines.push(`${index + 1}. ${item.word}`));
+  }
+  return lines.join(NL);
+}
+
+function dialogueComprehension(words, level, showAnswers = true) {
+  const lines = [
+    "DIALOGUE EXERCISE: Comprehension questions.",
+    "Answer in full sentences.",
+    "",
+    "1. What problem are the speakers discussing?",
+    "2. Why do they need to be careful before making a decision?",
+    "3. Which vocabulary word means that something is not simple or obvious?",
+    "4. What should they do before speaking to the other team?",
+    "5. Choose three target words and explain how they are used in the dialogue."
+  ];
+  if (showAnswers) {
+    lines.push("", "Suggested Answer Key:");
+    lines.push("1. They are discussing a situation that may affect the whole project.");
+    lines.push("2. They may choose the wrong solution if they decide too quickly.");
+    lines.push(`3. Possible answer: ${words[4]?.word || "subtle/complex"}.`);
+    lines.push("4. They should prepare their ideas first.");
+    lines.push("5. Teacher check: answers should explain the meaning in context.");
+  }
+  return lines.join(NL);
+}
+
+function dialogueRolePlay(words, level) {
+  const selected = words.slice(0, 8).map((item) => item.word).join(" – ");
+  const lines = [
+    "DIALOGUE EXERCISE: Role-play.",
+    "",
+    "Student A: You think the project needs a safer plan.",
+    "Student B: You think the team should act quickly.",
+    "",
+    `Use at least 6 of these words: ${selected}`,
+    "",
+    "Step 1. Prepare your arguments.",
+    "Step 2. Have a 2–3 minute dialogue.",
+    "Step 3. Finish with a decision both speakers can accept."
+  ];
+  return lines.join(NL);
+}
+
+function dialoguePractice(words, level, langCode, exerciseType, showAnswers = true) {
   const lines = ["DIALOGUE PRACTICE", "", `Level focus: ${level}.`, ""];
-  lines.push("Student A: ask questions naturally.");
-  lines.push("Student B: answer with details and use the target vocabulary.", "");
-  words.slice(0, 10).forEach((item, index) => lines.push(`${index + 1}. Create a short dialogue using: ${item.word}`));
+  lines.push(readyDialogue(words, level));
+  lines.push("", "TARGET VOCABULARY IN THE DIALOGUE", "");
+  words.slice(0, 10).forEach((item, index) => lines.push(`${index + 1}. ${item.word} — ${translationOf(item, langCode)}`));
+  lines.push("", "DIALOGUE TASK BASED ON YOUR EXERCISE TYPE", "");
+
+  if (exerciseType === "gap") lines.push(gappedDialogue(words, level, showAnswers));
+  else if (exerciseType === "choose") lines.push(multipleChoice(words.slice(0, 8), langCode, showAnswers));
+  else if (exerciseType === "match") lines.push(matchMeanings(words.slice(0, 8), langCode, showAnswers));
+  else if (exerciseType === "intoEnglish") lines.push(translateIntoEnglish(words.slice(0, 8), langCode, showAnswers));
+  else if (exerciseType === "fromEnglish") lines.push(translateFromEnglish(words.slice(0, 8), langCode, showAnswers));
+  else if (exerciseType === "collocations") lines.push(collocationPractice(words.slice(0, 8), showAnswers));
+  else if (exerciseType === "definitions") lines.push(definitionPractice(words.slice(0, 8), langCode, showAnswers));
+  else if (exerciseType === "questions") lines.push(dialogueComprehension(words, level, showAnswers));
+  else if (exerciseType === "sentences") lines.push(dialogueRolePlay(words, level));
+  else if (exerciseType === "spelling") lines.push(spellingPractice(words.slice(0, 8), showAnswers));
+  else if (exerciseType === "transformation") lines.push(sentenceTransformation(words.slice(0, 8), langCode, showAnswers));
+  else if (exerciseType === "wordFormation") lines.push(wordFormation(words.slice(0, 8), showAnswers));
+  else if (exerciseType === "oddOneOut") lines.push(oddOneOut(words.slice(0, 8), langCode, showAnswers));
+  else if (exerciseType === "miniStory") lines.push(miniStory(words.slice(0, 8)));
+  else if (exerciseType === "mixedChallenge") lines.push(mixedChallenge(words.slice(0, 10), langCode, showAnswers));
+  else lines.push(gappedDialogue(words, level, showAnswers), "", dialogueComprehension(words, level, showAnswers), "", dialogueRolePlay(words, level));
+
   return lines.join(NL);
 }
 
@@ -1642,7 +1751,7 @@ function fullWorkbook(words, settings) {
 
 function buildWorksheet(words, settings) {
   if (!words.length) return "No words found. Choose automatic mode or paste words like: confident — уверенный";
-  if (settings.format === "dialogue") return header(settings) + wordList(words, settings.targetLanguage) + NL + NL + dialoguePractice(words, settings.level);
+  if (settings.format === "dialogue") return header(settings) + wordList(words, settings.targetLanguage) + NL + NL + dialoguePractice(words, settings.level, settings.targetLanguage, settings.exerciseType, settings.showAnswers);
   if (settings.format === "speaking") return header(settings) + wordList(words, settings.targetLanguage) + NL + NL + speakingPractice(words, settings.level);
 
   const map = {
