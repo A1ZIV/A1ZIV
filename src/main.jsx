@@ -5,8 +5,13 @@ import "./styles.css";
 const NL = String.fromCharCode(10);
 const CONTACT_EMAIL = "ksam54041@gmai.com";
 
+// Only languages with complete built-in translations are shown here.
+// Do not add a language unless every built-in vocabulary entry has real translations for it.
 const LANGUAGES = [
-  "Russian", "Kazakh", "Swedish", "German", "Spanish", "French", "Italian", "Turkish", "Ukrainian", "Polish", "Portuguese", "Chinese", "Japanese", "Korean", "Arabic", "Hindi"
+  "Russian",
+  "Kazakh",
+  "Swedish",
+  "German"
 ];
 
 const LEVELS = ["A1", "A2", "B1", "B2", "C1", "C2"];
@@ -171,7 +176,12 @@ function parseEntry(entry, language) {
   const parts = entry.split("|");
   const word = parts[0] || "word";
   const idx = LANGUAGE_INDEX[language];
-  const meaning = idx ? (parts[idx] || parts[1] || word) : `${FALLBACK_TRANSLATIONS[language] || "translation"}: ${word}`;
+
+  // Safety rule: if a language does not have real built-in translations,
+  // fall back to Russian instead of showing fake labels like "translation: word".
+  const safeIndex = idx || LANGUAGE_INDEX.Russian;
+  const meaning = parts[safeIndex] || parts[LANGUAGE_INDEX.Russian] || word;
+
   return { word, meaning };
 }
 
@@ -582,7 +592,7 @@ function App() {
             <label>Topic<select value={topic} onChange={(e) => { setTopic(e.target.value); setSeed((s) => s + 1); }} >{TOPICS.map((x) => <option key={x}>{x}</option>)}</select></label>
           </div>
           <div className="grid-2">
-            <label>Translation language<select value={language} onChange={(e) => setLanguage(e.target.value)}>{LANGUAGES.map((x) => <option key={x}>{x}</option>)}</select></label>
+            <label>Translation language<select value={language} onChange={(e) => setLanguage(e.target.value)}>{LANGUAGES.map((x) => <option key={x}>{x}</option>)}</select><small>Only languages with real built-in translations are shown.</small></label>
             <label>Number of words<select value={count} onChange={(e) => setCount(Number(e.target.value))}><option value="5">5</option><option value="8">8</option><option value="10">10</option><option value="12">12</option></select></label>
           </div>
           <label>Material format<select value={format} onChange={(e) => setFormat(e.target.value)}>{FORMATS.map((f) => <option key={f.value} value={f.value}>{f.label}</option>)}</select></label>
