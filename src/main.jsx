@@ -90,49 +90,82 @@ const FALLBACK_TRANSLATIONS = {
   Spanish: "traducción", French: "traduction", Italian: "traduzione", Turkish: "çeviri", Ukrainian: "переклад", Polish: "tłumaczenie", Portuguese: "tradução", Chinese: "翻译", Japanese: "翻訳", Korean: "번역", Arabic: "ترجمة", Hindi: "अनुवाद"
 };
 
-const COMMON_SINGLE_WORDS = {
+const KNOWN_CUSTOM_WORDS = {
   "привет": { word: "hello", meaning: "привет" },
+  "здравствуйте": { word: "hello", meaning: "здравствуйте" },
   "пока": { word: "goodbye", meaning: "пока" },
   "спасибо": { word: "thank you", meaning: "спасибо" },
   "пожалуйста": { word: "please", meaning: "пожалуйста" },
-  "дом": { word: "house", meaning: "дом" },
-  "школа": { word: "school", meaning: "школа" },
-  "работа": { word: "work", meaning: "работа" },
-  "деньги": { word: "money", meaning: "деньги" },
-  "бизнес": { word: "business", meaning: "бизнес" },
-  "цель": { word: "goal", meaning: "цель" },
-  "прибыль": { word: "profit", meaning: "прибыль" },
+  "да": { word: "yes", meaning: "да" },
+  "нет": { word: "no", meaning: "нет" },
+  "стратегия": { word: "strategy", meaning: "стратегия" },
   "бюджет": { word: "budget", meaning: "бюджет" },
   "инвестиция": { word: "investment", meaning: "инвестиция" },
+  "инвестиции": { word: "investment", meaning: "инвестиции" },
+  "прибыль": { word: "profit", meaning: "прибыль" },
   "клиент": { word: "client", meaning: "клиент" },
-  "стратегия": { word: "strategy", meaning: "стратегия" },
-  "ответственность": { word: "responsibility", meaning: "ответственность" },
-  "решение": { word: "decision", meaning: "решение" },
-  "путешествие": { word: "journey", meaning: "путешествие" },
-  "улучшать": { word: "improve", meaning: "улучшать" },
-  "опыт": { word: "experience", meaning: "опыт" },
-  "сәлем": { word: "hello", meaning: "сәлем" },
-  "рахмет": { word: "thank you", meaning: "рахмет" },
-  "үй": { word: "house", meaning: "үй" },
-  "мектеп": { word: "school", meaning: "мектеп" },
-  "ақша": { word: "money", meaning: "ақша" },
-  "жұмыс": { word: "work", meaning: "жұмыс" }
+  "переговоры": { word: "negotiation", meaning: "переговоры" },
+  "вести переговоры": { word: "negotiate", meaning: "вести переговоры" },
+  "предложение": { word: "proposal", meaning: "предложение" },
+  "командная работа": { word: "teamwork", meaning: "командная работа" },
+  "цель": { word: "target", meaning: "цель" },
+  "обратная связь": { word: "feedback", meaning: "обратная связь" },
+  "рост": { word: "growth", meaning: "рост" }
 };
 
-function inferSingleWord(line) {
-  const clean = String(line || "").trim().toLowerCase();
-  if (COMMON_SINGLE_WORDS[clean]) return COMMON_SINGLE_WORDS[clean];
+const WORD_CLUES = {
+  hello: "You say this word when you meet someone.",
+  goodbye: "You say this word when you leave someone.",
+  "thank you": "You say this phrase when someone helps you.",
+  please: "You use this word to make a request polite.",
+  yes: "This word means that you agree or accept something.",
+  no: "This word means that you refuse or disagree.",
+  strategy: "A plan used to reach a goal or solve a problem.",
+  budget: "A plan for how money will be spent.",
+  investment: "Money put into something to get future value or profit.",
+  profit: "Money a business earns after costs are paid.",
+  client: "A person or company that buys a service.",
+  negotiate: "To discuss conditions in order to reach an agreement.",
+  negotiation: "A discussion where people try to reach an agreement.",
+  proposal: "A formal suggestion or plan offered for discussion.",
+  "customer service": "Help and support given to customers.",
+  teamwork: "People working together to reach the same goal.",
+  target: "A goal or result that someone wants to achieve.",
+  feedback: "Comments that help someone improve their work.",
+  performance: "How well a person, team, or company does something.",
+  growth: "An increase or development over time.",
+  deadline: "The final time or date when something must be finished.",
+  revenue: "Money a company receives from sales before costs are removed.",
+  equity: "The value owned in a company or asset after debts are removed.",
+  asset: "Something valuable owned by a person or company.",
+  liability: "A financial obligation or debt that must be paid.",
+  cashflow: "The movement of money into and out of a business.",
+  "cash flow": "The movement of money into and out of a business."
+};
 
-  // If the user writes only an English word, keep it as the word and make a useful placeholder.
-  if (/^[a-zA-Z][a-zA-Z\s'-]*$/.test(clean)) {
-    return { word: line.trim(), meaning: "add translation / meaning" };
-  }
-
-  // If the user writes only a Russian/Kazakh/other word, we cannot translate every possible word without an API.
-  // Keep it visible and ask for a translation instead of deleting it.
-  return { word: line.trim(), meaning: "add English word or translation" };
-}
-
+const WORD_SENTENCES = {
+  hello: "When I entered the classroom, I said '_____' to everyone.",
+  goodbye: "At the end of the call, she said '_____' and closed her laptop.",
+  "thank you": "After receiving help, he said '_____' politely.",
+  please: "Could you help me with this task, _____?",
+  yes: "When the teacher asked if he understood, he said _____.",
+  no: "She said _____ because she could not attend the meeting.",
+  strategy: "The team needs a clear _____ before launching the project.",
+  budget: "We cannot buy new equipment because the _____ is limited.",
+  investment: "The company made a large _____ in new technology.",
+  profit: "The business increased its _____ after reducing costs.",
+  client: "The consultant prepared a report for the _____.",
+  negotiate: "The two companies will _____ before signing the contract.",
+  negotiation: "The _____ lasted two hours before both sides agreed.",
+  proposal: "The manager sent a new _____ to the client.",
+  "customer service": "Good _____ helps customers solve problems quickly.",
+  teamwork: "The project succeeded because of strong _____.",
+  target: "Our sales _____ for this month is higher than before.",
+  feedback: "The teacher gave useful _____ after the presentation.",
+  performance: "The employee's _____ improved after extra training.",
+  growth: "The company showed strong _____ this year.",
+  deadline: "We must finish the report before the _____."
+};
 
 function parseEntry(entry, language) {
   const parts = entry.split("|");
@@ -167,34 +200,57 @@ function shuffle(items) {
   return result;
 }
 
+function normalizeManualLine(line) {
+  const clean = line.trim();
+  const lower = clean.toLowerCase();
+  if (KNOWN_CUSTOM_WORDS[lower]) return KNOWN_CUSTOM_WORDS[lower];
+
+  const divider = clean.includes("—") ? "—" : clean.includes(" - ") ? " - " : clean.includes("-") ? "-" : clean.includes(":") ? ":" : null;
+  if (!divider) {
+    return { word: clean, meaning: "add translation" };
+  }
+
+  const parts = clean.split(divider);
+  const left = (parts[0] || "").trim();
+  const right = parts.slice(1).join(" — ").trim();
+  if (!left) return null;
+
+  const leftKnown = KNOWN_CUSTOM_WORDS[left.toLowerCase()];
+  if (leftKnown && !right) return leftKnown;
+
+  return { word: left, meaning: right || "add translation" };
+}
+
 function parseCustomWords(text) {
-  return String(text || "")
-    .replace(/\\n/g, "\n")
+  return text
     .split(/\n+/)
-    .map((line) => line.trim())
-    .filter(Boolean)
-    .map((line) => {
-      const divider = line.includes("—") ? "—" : line.includes(" - ") ? " - " : line.includes(":") ? ":" : null;
-      if (!divider) return inferSingleWord(line);
-
-      const parts = line.split(divider);
-      const left = (parts[0] || "").trim();
-      const right = parts.slice(1).join(" — ").trim();
-
-      if (!left && !right) return null;
-      if (!right) return inferSingleWord(left);
-
-      return { word: left, meaning: right };
-    })
+    .map((line) => normalizeManualLine(line))
     .filter(Boolean)
     .filter((item) => item.word);
 }
 
+function clueFor(item) {
+  const key = String(item.word || "").toLowerCase().trim();
+  return WORD_CLUES[key] || `This word belongs to the vocabulary list. Choose the best option from the list.`;
+}
+
+function gapSentenceFor(item, level, topic) {
+  const key = String(item.word || "").toLowerCase().trim();
+  if (WORD_SENTENCES[key]) return WORD_SENTENCES[key];
+  if (topic === "Finance") return `The finance team used this term in the report: _____.`;
+  if (topic === "Business") return `The manager used this term during the meeting: _____.`;
+  if (topic === "Technology") return `The speaker used this term to describe a digital idea: _____.`;
+  if (level === "A1" || level === "A2") return `Write the correct vocabulary word here: _____.`;
+  if (level === "C1" || level === "C2") return `Use the most precise vocabulary item to complete the idea: _____.`;
+  return `Complete the sentence with the correct vocabulary word: _____.`;
+}
+
 function sentenceFor(word, level, topic) {
   const target = word || "_____";
-  if (topic === "Finance") return `The finance team discussed ${target} before making the final budget decision.`;
-  if (topic === "Business") return `During the meeting, the manager explained how ${target} could improve the project.`;
-  if (topic === "Technology") return `The team used ${target} to describe a new digital solution.`;
+  if (target === "_____") return "Complete the sentence with the correct vocabulary word: _____.";
+  if (topic === "Finance") return `The finance team used ${target} as an important term in the report.`;
+  if (topic === "Business") return `During the meeting, the manager used ${target} in a clear business context.`;
+  if (topic === "Technology") return `The team used ${target} to describe a digital solution.`;
   if (level === "A1" || level === "A2") return `I can use ${target} in a short everyday sentence.`;
   if (level === "C1" || level === "C2") return `The speaker used ${target} to express a more precise and sophisticated idea.`;
   return `The student used ${target} correctly in a clear context.`;
@@ -219,7 +275,6 @@ function header(title, level, topic, language, format) {
 }
 
 function vocabularyList(words) {
-  if (!words.length) return ["VOCABULARY LIST", "", "Add words first. Best format: English word — translation.", ""].join(NL);
   return ["VOCABULARY LIST", "", ...words.map((item, i) => `${i + 1}. ${item.word} — ${item.meaning}`), ""].join(NL);
 }
 
@@ -248,9 +303,9 @@ function matchTask(words, showAnswers) {
 function gapTask(words, level, topic, showAnswers) {
   const lines = ["EXERCISE. Fill in the gaps.", "", `Use the words: ${words.map((w) => w.word).join(" / ")}`, ""];
   words.forEach((item, i) => {
-    lines.push(`${i + 1}. ${sentenceFor("_____", level, topic)} (${item.meaning})`);
+    lines.push(`${i + 1}. ${gapSentenceFor(item, level, topic)}`);
   });
-  if (showAnswers) lines.push("", "Answer Key:", ...words.map((item, i) => `${i + 1}. ${item.word}`));
+  if (showAnswers) lines.push("", "Answer Key:", ...words.map((item, i) => `${i + 1}. ${item.word} — ${item.meaning}`));
   return lines.join(NL);
 }
 
@@ -259,8 +314,8 @@ function mcqTask(words, level, topic, showAnswers) {
   const answers = [];
   words.forEach((item, i) => {
     const options = shuffle([item.word, ...shuffle(words.filter((x) => x.word !== item.word)).slice(0, 3).map((x) => x.word)]);
-    answers.push(`${i + 1}. ${String.fromCharCode(65 + options.indexOf(item.word))} — ${item.word}`);
-    lines.push(`${i + 1}. ${sentenceFor("_____", level, topic)} Meaning: ${item.meaning}`);
+    answers.push(`${i + 1}. ${String.fromCharCode(65 + options.indexOf(item.word))} — ${item.word} = ${item.meaning}`);
+    lines.push(`${i + 1}. ${clueFor(item)}`);
     options.forEach((op, idx) => lines.push(`${String.fromCharCode(65 + idx)}. ${op}`));
     lines.push("");
   });
@@ -469,7 +524,7 @@ function App() {
   const [seed, setSeed] = useState(0);
 
   const words = useMemo(() => {
-    if (manual) return uniqueWords(parseCustomWords(customText));
+    if (manual) return uniqueWords(parseCustomWords(customText)).slice(0, count);
     const generated = uniqueWords(topicWords(level, topic, language));
     const rotated = [...generated.slice(seed % Math.max(1, generated.length)), ...generated.slice(0, seed % Math.max(1, generated.length))];
     return rotated.slice(0, count);
@@ -495,23 +550,12 @@ function App() {
   }
 
   function startEditingCurrentWords() {
-    setCustomText((current) => current.trim() ? current : wordsToEditableText(words));
+    setCustomText(wordsToEditableText(words));
     setManual(true);
   }
 
   function useAutomaticWords() {
     setManual(false);
-    setSeed((s) => s + 1);
-  }
-
-  function handleRegenerateWords() {
-    // In manual mode this must NOT delete or replace the user's words.
-    // It only refreshes the generated tasks that are built from the same words.
-    if (manual) {
-      setChecked(false);
-      setAnswers({});
-      return;
-    }
     setSeed((s) => s + 1);
   }
 
@@ -543,16 +587,8 @@ function App() {
           </div>
           <label>Material format<select value={format} onChange={(e) => setFormat(e.target.value)}>{FORMATS.map((f) => <option key={f.value} value={f.value}>{f.label}</option>)}</select></label>
           <label>Exercise type<select value={taskType} onChange={(e) => setTaskType(e.target.value)}>{TASK_TYPES.map((t) => <option key={t.value} value={t.value}>{t.label}</option>)}</select></label>
-          <div className="button-row">
-            <button onClick={handleRegenerateWords}>{manual ? "Update tasks from my words" : "Regenerate words"}</button>
-            <button className="secondary-button" onClick={manual ? useAutomaticWords : startEditingCurrentWords}>{manual ? "Use automatic words" : "Edit current words"}</button>
-          </div>
-          {manual && (
-            <>
-              <p className="helper-note">Your words will not be deleted. Best format: English word — translation. If you write only one unknown word, the site will keep it, but it cannot translate every word without an AI API.</p>
-              <label>Edit words<textarea value={customText} onChange={(e) => setCustomText(e.target.value)} placeholder={"strategy — стратегия\nbudget — бюджет\ninvestment — инвестиция"} /></label>
-            </>
-          )}
+          <div className="button-row"><button onClick={() => { if (!manual) setSeed((s) => s + 1); }}>{manual ? "Update tasks from my words" : "Regenerate words"}</button><button className="secondary-button" onClick={manual ? useAutomaticWords : startEditingCurrentWords}>{manual ? "Use automatic words" : "Edit current words"}</button></div>
+          {manual && <label>Edit words<textarea value={customText} onChange={(e) => setCustomText(e.target.value)} placeholder="word — translation\nstrategy — стратегия\nbudget — бюджет" /></label>}
           {!manual && <div className="word-preview"><h3>Current words</h3>{words.map((w) => <span key={w.word}>{w.word} — {w.meaning}</span>)}</div>}
         </section>
 
