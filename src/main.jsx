@@ -345,19 +345,29 @@ function parseEntry(entry, language) {
   return { word, meaning: translated };
 }
 
+const LEVEL_EXPANSION = {
+  A1: ["A1", "A2"],
+  A2: ["A2", "A1", "B1"],
+  B1: ["B1", "A2", "B2"],
+  B2: ["B2", "B1", "C1"],
+  C1: ["C1", "B2", "C2"],
+  C2: ["C2", "C1"]
+};
+
 function collectRawEntries(level, topic) {
   const levelData = BASE_WORDS[level] || BASE_WORDS.B1;
   const exactTopic = levelData[topic] || EXTRA_TOPICS[topic] || [];
-  const sameLevelAllTopics = Object.values(levelData).flat();
   const extraTopic = EXTRA_TOPICS[topic] || [];
-  const allLevels = LEVELS.flatMap((lvl) => Object.values(BASE_WORDS[lvl] || {}).flat());
+  const sameLevelAllTopics = Object.values(levelData).flat();
+  const allowedLevels = LEVEL_EXPANSION[level] || [level];
+  const nearbyLevels = allowedLevels.flatMap((lvl) => Object.values(BASE_WORDS[lvl] || {}).flat());
   const allExtraTopics = Object.values(EXTRA_TOPICS).flat();
 
   return [
     ...exactTopic,
     ...extraTopic,
     ...sameLevelAllTopics,
-    ...allLevels,
+    ...nearbyLevels,
     ...allExtraTopics
   ];
 }
@@ -417,6 +427,110 @@ function parseCustomWords(text) {
     .map((line) => normalizeManualLine(line))
     .filter(Boolean)
     .filter((item) => item.word);
+}
+
+const LEVEL_PROFILES = {
+  A1: {
+    readingLabel: "very short and simple",
+    grammar: "be / have / Present Simple",
+    grammarTasks: [
+      "Choose am / is / are.",
+      "Make a positive and a negative sentence.",
+      "Write one short question with the target word."
+    ]
+  },
+  A2: {
+    readingLabel: "short everyday",
+    grammar: "Past Simple, there is / there are, comparatives",
+    grammarTasks: [
+      "Put the sentence into the Past Simple.",
+      "Compare two things using the target word.",
+      "Write a question and a short answer."
+    ]
+  },
+  B1: {
+    readingLabel: "clear intermediate",
+    grammar: "Present Perfect, first conditional, modal verbs",
+    grammarTasks: [
+      "Complete a first conditional sentence.",
+      "Rewrite the idea using should / must / have to.",
+      "Use the target word in a Present Perfect sentence."
+    ]
+  },
+  B2: {
+    readingLabel: "developed upper-intermediate",
+    grammar: "passive voice, relative clauses, contrast clauses",
+    grammarTasks: [
+      "Rewrite the sentence in the passive voice.",
+      "Add a relative clause to give more detail.",
+      "Connect two ideas using although / whereas / despite."
+    ]
+  },
+  C1: {
+    readingLabel: "analytical advanced",
+    grammar: "hedging, inversion, cleft sentences, complex clauses",
+    grammarTasks: [
+      "Rewrite the sentence using cautious academic language.",
+      "Use inversion for emphasis.",
+      "Create a complex sentence with concession and cause."
+    ]
+  },
+  C2: {
+    readingLabel: "highly nuanced proficient",
+    grammar: "nominalisation, register shift, advanced cohesion, precision structures",
+    grammarTasks: [
+      "Nominalise the idea to make it more formal.",
+      "Rewrite the sentence in a more precise professional register.",
+      "Add a nuanced contrast without changing the meaning."
+    ]
+  }
+};
+
+const TOPIC_SCENARIOS = {
+  "Everyday life": "a learner trying to organise daily routines and communicate more naturally",
+  School: "a student preparing for lessons, homework and exams",
+  Travel: "a traveller solving problems at the airport, hotel and city centre",
+  Work: "an employee dealing with colleagues, tasks and workplace communication",
+  Business: "a small team planning a project, speaking to clients and making decisions",
+  Finance: "a finance team reviewing costs, risk, income and future investment decisions",
+  Technology: "a team discussing digital tools, privacy, updates and online work",
+  Health: "a person explaining symptoms, treatment and healthy habits",
+  Environment: "a community discussing pollution, climate choices and sustainable habits",
+  Emotions: "a person describing feelings, pressure and personal reactions",
+  Crime: "an investigation where people discuss evidence, witnesses and decisions",
+  Culture: "people comparing traditions, identity and cultural differences"
+};
+
+function profileFor(level) {
+  return LEVEL_PROFILES[level] || LEVEL_PROFILES.B1;
+}
+
+function scenarioFor(topic) {
+  return TOPIC_SCENARIOS[topic] || `a realistic situation connected to ${topic}`;
+}
+
+function wordList(words, limit = 8) {
+  return words.slice(0, Math.min(limit, words.length)).map((w) => w.word).join(", ");
+}
+
+function safeWord(words, index, fallback) {
+  return words[index]?.word || fallback;
+}
+
+function teacherNote(showAnswers, text) {
+  return showAnswers ? `${NL}${NL}Teacher note: ${text}` : "";
+}
+
+function levelSentence(level, topic, words) {
+  const a = safeWord(words, 0, "vocabulary");
+  const b = safeWord(words, 1, "context");
+  const c = safeWord(words, 2, "practice");
+  if (level === "A1") return `I use ${a}. I know ${b}. I practise ${c}.`;
+  if (level === "A2") return `Yesterday, the learner used ${a} and ${b} in a short conversation about ${topic.toLowerCase()}.`;
+  if (level === "B1") return `The learner has used ${a} and ${b} several times, so the words are becoming easier to remember.`;
+  if (level === "B2") return `Although ${a} may look simple at first, it becomes more useful when it is connected with ${b} and ${c}.`;
+  if (level === "C1") return `What makes ${a} valuable is not translation alone, but the learner's ability to connect it with ${b}, ${c}, and a wider communicative purpose.`;
+  return `A sophisticated command of ${a} requires not only semantic accuracy, but also sensitivity to register, implication, and the way it interacts with terms such as ${b} and ${c}.`;
 }
 
 function clueFor(item) {
@@ -525,83 +639,251 @@ function translationTask(words, direction, showAnswers) {
 function otherTask(words, type, level, topic, showAnswers) {
   const label = TASK_TYPES.find((t) => t.value === type)?.label || "Practice";
   const lines = [`EXERCISE. ${label}.`, ""];
-  if (type === "definitions") words.forEach((item, i) => lines.push(`${i + 1}. Define '${item.word}' in English: ______________________________`));
-  else if (type === "sentences") words.forEach((item, i) => lines.push(`${i + 1}. Write a natural sentence with '${item.word}': ______________________________`));
-  else if (type === "questions") words.forEach((item, i) => lines.push(`${i + 1}. Answer a personal question using '${item.word}'.`));
-  else if (type === "collocations") words.forEach((item, i) => lines.push(`${i + 1}. Write two words that naturally go with '${item.word}'.`));
-  else if (type === "word_formation") words.forEach((item, i) => lines.push(`${i + 1}. Make a new form of '${item.word}' and use it in a sentence.`));
-  else if (type === "odd") words.forEach((item, i) => lines.push(`${i + 1}. ${item.word} / ${words[(i + 1) % words.length].word} / ${words[(i + 2) % words.length].word} / __________ — Which one is different and why?`));
-  else if (type === "story") lines.push(`Write a short ${level}-level story about ${topic}. Use these words: ${words.map((w) => w.word).join(", ")}.`);
-  else lines.push("Complete a mixed challenge: translate 5 words, write 5 sentences, and explain 3 meanings in English.");
-  if (showAnswers) lines.push("", "Teacher note: open answers. Check accuracy, natural use, and level-appropriate complexity.");
+  const selected = words.slice(0, Math.min(words.length, 12));
+
+  if (type === "definitions") {
+    selected.forEach((item, i) => lines.push(`${i + 1}. Explain '${item.word}' in English without translating it directly: ______________________________`));
+  } else if (type === "sentences") {
+    selected.forEach((item, i) => lines.push(`${i + 1}. Write a natural ${level}-level sentence with '${item.word}': ______________________________`));
+  } else if (type === "questions") {
+    selected.forEach((item, i) => lines.push(`${i + 1}. Answer the question using '${item.word}': How could this word be useful in ${topic.toLowerCase()}?`));
+  } else if (type === "collocations") {
+    selected.forEach((item, i) => lines.push(`${i + 1}. Write two natural collocations with '${item.word}', then write one example sentence.`));
+  } else if (type === "word_formation") {
+    selected.forEach((item, i) => lines.push(`${i + 1}. Create a related word form for '${item.word}' if possible, then use it in a sentence.`));
+  } else if (type === "odd") {
+    selected.forEach((item, i) => {
+      const second = selected[(i + 1) % selected.length]?.word || "word";
+      const third = selected[(i + 2) % selected.length]?.word || "term";
+      lines.push(`${i + 1}. ${item.word} / ${second} / ${third} / __________ — Add one word that does not belong and explain why.`);
+    });
+  } else if (type === "story") {
+    lines.push(`Write a ${level}-level mini story about ${scenarioFor(topic)}.`);
+    lines.push(`Use at least ${Math.min(8, words.length)} of these words: ${wordList(words, 12)}.`);
+    lines.push("Make the story logical: beginning → problem → solution → reflection.");
+  } else {
+    lines.push(`Mixed challenge about ${topic}:`);
+    lines.push(`1. Translate five words into the selected language.`);
+    lines.push(`2. Write five ${level}-level sentences.`);
+    lines.push(`3. Explain three words without using translation.`);
+    lines.push(`4. Use two words together in a short paragraph.`);
+  }
+
+  if (showAnswers) lines.push("", "Teacher note: open answers. Check meaning, natural usage, grammar control, and whether the answer matches the selected level.");
   return lines.join(NL);
 }
 
+
 function buildReading(words, level, topic, showAnswers) {
-  const wordLine = words.slice(0, 6).map((w) => w.word).join(", ");
-  const complexity = level === "A1" || level === "A2" ? "simple" : level === "C1" || level === "C2" ? "analytical and detailed" : "clear and realistic";
-  const text = `READING TEXT\n\nThis ${complexity} text is about ${topic}. The main idea is that learners should not only memorise vocabulary, but also understand how words work in context. In this topic, words such as ${wordLine} help the reader describe situations more accurately. A good learner studies the meaning first, then notices examples, and finally uses the words independently. This process makes vocabulary active instead of passive.`;
-  return [text, "", "COMPREHENSION TASKS", "1. What is the main idea of the text?", "2. Why is context important for vocabulary learning?", `3. Find and explain three words connected to ${topic}.`, "4. Write a short summary of the text.", showAnswers ? "\nAnswer Key: Answers may vary. Check understanding, examples, and accurate use of target vocabulary." : ""].join(NL);
+  const profile = profileFor(level);
+  const scenario = scenarioFor(topic);
+  const targets = wordList(words, 10);
+  const a = safeWord(words, 0, "vocabulary");
+  const b = safeWord(words, 1, "communication");
+  const c = safeWord(words, 2, "practice");
+  const d = safeWord(words, 3, "decision");
+
+  let text = "";
+  if (level === "A1") {
+    text = `READING TEXT\n\nThis is a ${profile.readingLabel} text about ${topic}. A person learns new words every day. The words are ${targets}. The person reads the words, says them, and writes short sentences. ${levelSentence(level, topic, words)} This helps the person remember the words.`;
+  } else if (level === "A2") {
+    text = `READING TEXT\n\nThis ${profile.readingLabel} text is about ${scenario}. The learner sees words such as ${targets}. First, the learner checks the meaning. Then, the learner writes examples and uses the words in a short dialogue. ${levelSentence(level, topic, words)} After several minutes of practice, the words feel more familiar and easier to use.`;
+  } else if (level === "B1") {
+    text = `READING TEXT\n\nThis ${profile.readingLabel} text is about ${scenario}. Many students remember a word for a lesson, but forget it later because they only translate it once. A better method is to connect vocabulary with a realistic situation. For example, words such as ${targets} can be used in short answers, questions and mini-stories. ${levelSentence(level, topic, words)} When learners meet the same word in different tasks, they start using it more confidently.`;
+  } else if (level === "B2") {
+    text = `READING TEXT\n\nThis ${profile.readingLabel} text examines ${scenario}. Vocabulary learning becomes more effective when learners move beyond memorising isolated translations. Terms such as ${targets} should appear in definitions, context sentences, dialogues and problem-solving tasks. ${levelSentence(level, topic, words)} This approach is especially useful at B2 level, where students need to explain ideas, justify choices and understand how words behave in realistic communication.`;
+  } else if (level === "C1") {
+    text = `READING TEXT\n\nThis ${profile.readingLabel} text explores ${scenario}. At advanced level, vocabulary knowledge is not simply the ability to give a quick translation. Learners must judge register, nuance and context. Words such as ${targets} can carry different implications depending on whether they appear in a casual conversation, a professional discussion or an analytical text. ${levelSentence(level, topic, words)} Therefore, effective practice should ask students to interpret, reformulate and apply vocabulary rather than merely recognise it.`;
+  } else {
+    text = `READING TEXT\n\nThis ${profile.readingLabel} text considers ${scenario} from a more critical perspective. A proficient learner does not treat vocabulary as a static list of equivalents; instead, they evaluate precision, connotation, register and communicative effect. Lexical items such as ${targets} are useful only when they can be deployed accurately under changing contextual demands. ${levelSentence(level, topic, words)} For that reason, high-level practice should include interpretation, synthesis, controlled reformulation and independent production, because these tasks reveal whether a word is genuinely active or merely recognised.`;
+  }
+
+  const questions = [
+    "COMPREHENSION TASKS",
+    "1. What is the main purpose of the text?",
+    `2. Which words from the vocabulary list are most connected to ${topic}? Explain why.`,
+    `3. Find one sentence where vocabulary is connected to context.`,
+    "4. Write a short summary in your own words.",
+    level === "A1" || level === "A2" ? "5. Write two easy sentences with two target words." : "5. Explain how the text suggests learners should move from passive recognition to active use."
+  ];
+
+  if (showAnswers) {
+    questions.push("", "Answer Key:", "1. The text explains how to learn and use vocabulary in context.", `2. Answers vary; students should choose words from the list and connect them to ${topic}.`, "3. Accept any accurate sentence from the text that shows vocabulary in use.", "4. Answers vary; check content and clarity.", "5. Answers vary; check accurate use of target vocabulary.");
+  }
+  return [text, "", ...questions].join(NL);
 }
 
-function buildDialogue(words, level, topic, showAnswers) {
-  const a = words[0]?.word || "strategy";
-  const b = words[1]?.word || "decision";
-  const c = words[2]?.word || "evidence";
-  return [
-    "READY DIALOGUE", "",
-    `A: We need to talk about ${topic.toLowerCase()} today. I think ${a} is the key point.`,
-    `B: I agree, but we also need to consider ${b}. Without it, the plan may not work.`,
-    `A: True. Do we have enough ${c} to support this idea?`,
-    `B: Not yet. Let's collect examples and then make a stronger answer.`,
-    `A: Good. This will help us use the vocabulary at ${level} level, not just memorise it.`,
-    "", matchTask(words.slice(0, Math.min(8, words.length)), showAnswers)
-  ].join(NL);
+
+function buildDialogue(words, level, topic, taskType, showAnswers) {
+  const scenario = scenarioFor(topic);
+  const a = safeWord(words, 0, "strategy");
+  const b = safeWord(words, 1, "decision");
+  const c = safeWord(words, 2, "evidence");
+  const d = safeWord(words, 3, "feedback");
+  const e = safeWord(words, 4, "target");
+
+  const simple = level === "A1" || level === "A2";
+  const advanced = level === "C1" || level === "C2";
+  const dialogue = simple
+    ? [
+        "READY DIALOGUE", "",
+        `A: Hi! Today we are talking about ${topic.toLowerCase()}.`,
+        `B: Good. I want to learn the word '${a}'.`,
+        `A: Let's use it in a sentence. Then we can practise '${b}'.`,
+        `B: OK. I will write one sentence and say it aloud.`,
+        `A: Great. After that, we can review '${c}' together.`
+      ]
+    : advanced
+    ? [
+        "READY DIALOGUE", "",
+        `A: Before we make a final judgement about ${scenario}, we need to clarify how '${a}' affects the discussion.`,
+        `B: I agree, although '${b}' may be just as important if we want a balanced interpretation.`,
+        `A: True. The problem is that our current '${c}' is not strong enough to support a confident conclusion.`,
+        `B: Then we should invite '${d}' and compare it with the original ${topic.toLowerCase()} objective.`,
+        `A: Exactly. That would help us move from memorising vocabulary to using it with precision and purpose.`
+      ]
+    : [
+        "READY DIALOGUE", "",
+        `A: We need to discuss ${scenario}. I think '${a}' is the first word we should practise.`,
+        `B: That makes sense, but '${b}' is also important because it changes the situation.`,
+        `A: Do we have enough '${c}' to explain our answer clearly?`,
+        `B: Not yet. Let's add an example and ask for '${d}'.`,
+        `A: Good idea. Then we can connect everything to our main '${e}'.`
+      ];
+
+  const practiceType = taskType === "full" ? "gap" : taskType;
+  const followUp = buildMainTask(words.slice(0, Math.min(10, words.length)), practiceType, level, topic, showAnswers);
+  return [...dialogue, "", "DIALOGUE TASK", "Read the dialogue. Then complete the exercise below.", "", followUp].join(NL);
 }
+
 
 function buildGrammar(words, level, topic, showAnswers) {
-  const grammar = level === "A1" ? "Present Simple" : level === "A2" ? "Past Simple and comparatives" : level === "B1" ? "Present Perfect and conditionals" : level === "B2" ? "passive voice and relative clauses" : level === "C1" ? "inversion, hedging, and complex clauses" : "advanced nominalisation and precision structures";
-  return [
-    "GRAMMAR PRACTICE", "", `Focus: ${grammar}`, "",
-    `1. Write three sentences about ${topic} using: ${words[0]?.word || "the first word"}.`,
-    `2. Rewrite this sentence in a more ${level}-appropriate way: People use vocabulary to speak better.`,
-    `3. Complete the sentence: If learners practise ${words[1]?.word || "new vocabulary"}, they ____________________.`,
-    `4. Correct the mistake: The student very interested in ${topic}.`,
-    showAnswers ? "\nAnswer Key: 1 open answer. 2 possible: Vocabulary practice enables learners to communicate with greater precision. 3 open conditional. 4 The student is very interested in the topic." : ""
-  ].join(NL);
+  const profile = profileFor(level);
+  const a = safeWord(words, 0, "vocabulary");
+  const b = safeWord(words, 1, "practice");
+  const c = safeWord(words, 2, "context");
+  const lines = ["GRAMMAR PRACTICE", "", `Level focus: ${profile.grammar}`, `Topic: ${topic}`, ""];
+
+  profile.grammarTasks.forEach((task, index) => {
+    const word = [a, b, c][index] || a;
+    lines.push(`${index + 1}. ${task} Use the word '${word}'.`);
+  });
+
+  if (level === "A1") {
+    lines.push("4. Complete: I _____ interested in this topic.");
+    lines.push(`5. Make a question with '${a}': ______________________________`);
+  } else if (level === "A2") {
+    lines.push(`4. Put into the past: I use '${a}' in class.`);
+    lines.push(`5. Make a comparison using '${b}': ______________________________`);
+  } else if (level === "B1") {
+    lines.push(`4. Complete: If I practise '${a}' regularly, I will ____________________. `);
+    lines.push(`5. Write a sentence with '${b}' and should / must / have to.`);
+  } else if (level === "B2") {
+    lines.push(`4. Rewrite in passive voice: The teacher explained '${a}' clearly.`);
+    lines.push(`5. Write a complex sentence with '${b}' using although or whereas.`);
+  } else if (level === "C1") {
+    lines.push(`4. Rewrite with hedging: '${a}' is the most important factor.`);
+    lines.push(`5. Create a cleft sentence beginning with: What matters most is...`);
+  } else {
+    lines.push(`4. Nominalise this idea: People use '${a}' carefully.`);
+    lines.push(`5. Rewrite the sentence in a highly formal register: This word is useful because it helps people explain things.`);
+  }
+
+  if (showAnswers) {
+    lines.push("", "Answer Key / Teacher Guidance:");
+    lines.push("1–3. Answers vary; check grammar target, meaning and natural use of vocabulary.");
+    if (level === "A1") lines.push("4. I am interested in this topic.");
+    if (level === "A2") lines.push(`4. I used '${a}' in class.`);
+    if (level === "B2") lines.push(`4. '${a}' was explained clearly by the teacher.`);
+    lines.push("Open answers should match the selected level and use the target vocabulary accurately.");
+  }
+  return lines.join(NL);
 }
+
 
 function buildListening(words, level, topic, showAnswers) {
+  const profile = profileFor(level);
+  const scenario = scenarioFor(topic);
+  const targets = wordList(words, 8);
+  const script = level === "A1" || level === "A2"
+    ? `Speaker: Today we are learning words about ${topic}. Listen carefully. The words are ${targets}. First, repeat each word. Then, write one short sentence. Finally, answer one easy question about the topic.`
+    : level === "B1" || level === "B2"
+    ? `Speaker: Today we are looking at ${scenario}. The vocabulary list includes ${targets}. Do not only translate these words. Listen for how they are used in examples, then decide which words are useful for describing a problem, a solution or an opinion. Good vocabulary practice should help you understand meaning and use the words in your own speech.`
+    : `Speaker: This short talk examines ${scenario}. At ${level} level, vocabulary practice should train precision, register and interpretation. Words such as ${targets} should not be treated as isolated translations. Instead, learners should notice how each item changes the tone of an argument, strengthens a point or adds nuance to a complex explanation.`;
+
+  const tasks = [
+    "LISTENING SCRIPT", "", script, "", "LISTENING TASKS",
+    "1. Write the main topic of the talk.",
+    "2. Write five target words you hear.",
+    "3. Explain why translation alone is not enough.",
+    level === "A1" || level === "A2" ? "4. Write two short sentences with two words from the talk." : "4. Summarise the speaker's opinion in two or three sentences.",
+    level === "C1" || level === "C2" ? "5. Identify one idea connected to register, precision or nuance." : "5. Choose three words and make your own examples."
+  ];
+
+  if (showAnswers) tasks.push("", "Answer Key:", `1. ${topic}.`, "2. Accept words from the vocabulary list.", "3. Because learners must understand context and active use.", "4–5. Answers vary; check accuracy and level.");
+  return tasks.join(NL);
+}
+
+
+function buildWriting(words, level, topic, showAnswers) {
+  const targetWords = wordList(words, 10);
+  const lines = ["WRITING PRACTICE", "", `Topic: ${topic}`, `Level: ${level}`, `Use these words where natural: ${targetWords}`, ""];
+  if (level === "A1" || level === "A2") {
+    lines.push("Task 1: Write 5 short sentences using 5 different words from the list.");
+    lines.push(`Task 2: Write a short message about ${topic.toLowerCase()} using at least 3 target words.`);
+  } else if (level === "B1" || level === "B2") {
+    lines.push(`Task 1: Write a clear paragraph about ${scenarioFor(topic)}. Use at least 6 target words.`);
+    lines.push("Task 2: Add one example, one reason and one result.");
+    lines.push("Task 3: Underline the vocabulary words you used and check whether they sound natural.");
+  } else {
+    lines.push(`Task 1: Write an analytical paragraph about ${scenarioFor(topic)}. Use at least 7 target words with accurate register.`);
+    lines.push("Task 2: Rewrite the paragraph in a more formal or academic style.");
+    lines.push("Task 3: Add one nuanced contrast and one carefully justified conclusion.");
+  }
+  if (showAnswers) lines.push("", "Teacher note: assess task achievement, coherence, grammar control, lexical precision and whether the target words are used naturally rather than forced.");
+  return lines.join(NL);
+}
+
+
+function buildUseOfEnglish(words, level, topic, showAnswers) {
+  const selected = words.slice(0, Math.min(10, words.length));
   return [
-    "LISTENING SCRIPT", "",
-    `Speaker: Today I want to explain why ${topic.toLowerCase()} vocabulary matters. At ${level} level, students need more than translations. They need examples, context, and practice. Words such as ${words.slice(0, 6).map((w) => w.word).join(", ")} become useful only when learners can recognise them, understand them, and use them in their own speech.`,
-    "", "LISTENING TASKS", "1. Write the topic of the talk.", "2. Write three words you heard.", "3. Explain why translation alone is not enough.", "4. Retell the script in your own words.", showAnswers ? "\nAnswer Key: 1 depends on selected topic. 2 target words. 3 context and active use are necessary. 4 open answer." : ""
+    "USE OF ENGLISH", "",
+    `Level: ${level}`,
+    `Topic: ${topic}`, "",
+    "PART 1. Word formation", otherTask(selected.slice(0, 5), "word_formation", level, topic, showAnswers), "",
+    "PART 2. Collocations", otherTask(selected.slice(0, 5), "collocations", level, topic, showAnswers), "",
+    "PART 3. Meaning in context", mcqTask(selected.slice(0, 8), level, topic, showAnswers), "",
+    level === "C1" || level === "C2" ? "PART 4. Register shift\nRewrite three sentences in a more formal, precise style using target vocabulary." : "PART 4. Sentence building\nWrite five original sentences with target vocabulary."
   ].join(NL);
 }
 
-function buildWriting(words, level, topic, showAnswers) {
-  return ["WRITING PRACTICE", "", `Task 1: Write a ${level}-level paragraph about ${topic}. Use at least five words from the list.`, `Task 2: Write an opinion paragraph using these words: ${words.slice(0, 5).map((w) => w.word).join(", ")}.`, "Task 3: Improve your paragraph by adding examples and linking words.", showAnswers ? "\nTeacher note: assess content, organisation, vocabulary accuracy, and grammar control." : ""].join(NL);
-}
-
-function buildUseOfEnglish(words, level, topic, showAnswers) {
-  return ["USE OF ENGLISH", "", otherTask(words.slice(0, 5), "word_formation", level, topic, showAnswers), "", otherTask(words.slice(0, 5), "collocations", level, topic, showAnswers), "", mcqTask(words.slice(0, 5), level, topic, showAnswers)].join(NL);
-}
 
 function buildMainTask(words, taskType, level, topic, showAnswers) {
+  if (!words.length) return "No vocabulary generated yet.";
   if (taskType === "match") return matchTask(words, showAnswers);
   if (taskType === "gap") return gapTask(words, level, topic, showAnswers);
   if (taskType === "mcq") return mcqTask(words, level, topic, showAnswers);
   if (taskType === "translation_en") return translationTask(words, "en", showAnswers);
   if (taskType === "translation_target") return translationTask(words, "target", showAnswers);
-  if (taskType === "full") return [matchTask(words, showAnswers), "", gapTask(words, level, topic, showAnswers), "", mcqTask(words.slice(0, Math.min(8, words.length)), level, topic, showAnswers), "", otherTask(words, "sentences", level, topic, showAnswers)].join(NL);
+  if (taskType === "full") {
+    return [
+      "PART 1. Meaning recognition", matchTask(words.slice(0, Math.min(12, words.length)), showAnswers), "",
+      "PART 2. Context practice", gapTask(words.slice(0, Math.min(12, words.length)), level, topic, showAnswers), "",
+      "PART 3. Choice and deduction", mcqTask(words.slice(0, Math.min(10, words.length)), level, topic, showAnswers), "",
+      "PART 4. Active production", otherTask(words.slice(0, Math.min(10, words.length)), "sentences", level, topic, showAnswers), "",
+      "PART 5. Speaking or writing extension", otherTask(words.slice(0, Math.min(8, words.length)), "questions", level, topic, showAnswers)
+    ].join(NL);
+  }
   return otherTask(words, taskType, level, topic, showAnswers);
 }
+
 
 function buildMaterial({ words, title, level, topic, language, format, taskType, showAnswers }) {
   const intro = header(title, level, topic, language, format) + vocabularyList(words);
   let body = "";
   if (format === "reading") body = buildReading(words, level, topic, showAnswers);
-  else if (format === "dialogue") body = buildDialogue(words, level, topic, showAnswers);
+  else if (format === "dialogue") body = buildDialogue(words, level, topic, taskType, showAnswers);
   else if (format === "grammar") body = buildGrammar(words, level, topic, showAnswers);
   else if (format === "listening") body = buildListening(words, level, topic, showAnswers);
   else if (format === "writing") body = buildWriting(words, level, topic, showAnswers);
