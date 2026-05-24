@@ -615,6 +615,28 @@ function htmlEscape(text) {
   return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 }
 
+function wordDocumentContent(text, documentTitle) {
+  const safeTitle = htmlEscape(documentTitle || "A1ZIV Vocabulary Practice");
+  const body = htmlEscape(text).replace(/\n/g, "<br />");
+  return `<!doctype html>
+<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40">
+<head>
+  <meta charset="utf-8" />
+  <title>${safeTitle}</title>
+  <style>
+    @page { size: A4; margin: 2cm; }
+    body { font-family: Arial, sans-serif; font-size: 11pt; line-height: 1.45; color: #111827; }
+    h1 { font-size: 18pt; margin-bottom: 12pt; }
+    .worksheet { white-space: normal; }
+  </style>
+</head>
+<body>
+  <h1>${safeTitle}</h1>
+  <div class="worksheet">${body}</div>
+</body>
+</html>`;
+}
+
 function downloadFile(name, content, type) {
   const blob = new Blob([content], { type });
   const url = URL.createObjectURL(blob);
@@ -756,16 +778,38 @@ function App() {
   const score = words.reduce((sum, item, i) => sum + ((answers[i] || "").trim().toLowerCase() === item.word.toLowerCase() ? 1 : 0), 0);
 
   function copyText(text) { navigator.clipboard.writeText(text).catch(() => alert("Copy failed. Select the text manually.")); }
-  function download(text, suffix) {
-    if (downloadType === "html") downloadFile(makeFileName(title, suffix, "html"), `<!doctype html><html><head><meta charset="utf-8"><title>${htmlEscape(title)}</title></head><body><pre>${htmlEscape(text)}</pre></body></html>`, "text/html;charset=utf-8");
-    else downloadFile(makeFileName(title, suffix, "txt"), text, "text/plain;charset=utf-8");
+  function fileDataForDownload(text) {
+    if (downloadType === "word") {
+      return {
+        ext: "doc",
+        mime: "application/msword;charset=utf-8",
+        content: wordDocumentContent(text, title)
+      };
+    }
+    if (downloadType === "html") {
+      return {
+        ext: "html",
+        mime: "text/html;charset=utf-8",
+        content: `<!doctype html><html><head><meta charset="utf-8"><title>${htmlEscape(title)}</title></head><body><pre>${htmlEscape(text)}</pre></body></html>`
+      };
+    }
+    return { ext: "txt", mime: "text/plain;charset=utf-8", content: text };
   }
+
+  function download(text, suffix) {
+    const file = fileDataForDownload(text);
+    downloadFile(makeFileName(title, suffix, file.ext), file.content, file.mime);
+  }
+
   async function saveAs(text, suffix) {
+    const file = fileDataForDownload(text);
     if (!window.showSaveFilePicker) { download(text, suffix); return; }
-    const ext = downloadType === "html" ? "html" : "txt";
-    const handle = await window.showSaveFilePicker({ suggestedName: makeFileName(title, suffix, ext), types: [{ description: ext.toUpperCase(), accept: { [downloadType === "html" ? "text/html" : "text/plain"]: [`.${ext}`] } }] });
+    const handle = await window.showSaveFilePicker({
+      suggestedName: makeFileName(title, suffix, file.ext),
+      types: [{ description: file.ext.toUpperCase(), accept: { [file.mime.split(";")[0]]: [`.${file.ext}`] } }]
+    });
     const writable = await handle.createWritable();
-    await writable.write(downloadType === "html" ? `<pre>${htmlEscape(text)}</pre>` : text);
+    await writable.write(file.content);
     await writable.close();
   }
 
@@ -853,7 +897,7 @@ function App() {
               <h2>2. Student / Teacher versions</h2>
               <div className="grid-2"><button onClick={() => copyText(studentText)}>Copy Student Version</button><button onClick={() => copyText(teacherText)}>Copy Teacher Version</button></div>
               <div className="grid-2"><button className="secondary-button" onClick={() => download(studentText, "student")}>Download Student</button><button className="secondary-button" onClick={() => download(teacherText, "teacher")}>Download Teacher</button></div>
-              <div className="grid-2"><label>Download format<select value={downloadType} onChange={(e) => setDownloadType(e.target.value)}><option value="txt">TXT</option><option value="html">HTML</option></select></label><button className="secondary-button" onClick={() => saveAs(teacherText, "teacher")}>Choose where to save / Save as...</button></div>
+              <div className="grid-2"><label>Download format<select value={downloadType} onChange={(e) => setDownloadType(e.target.value)}><option value="txt">TXT</option><option value="html">HTML</option><option value="word">Word (.doc)</option></select></label><button className="secondary-button" onClick={() => saveAs(teacherText, "teacher")}>Choose where to save / Save as...</button></div>
               <pre>{teacherText}</pre>
             </>
           ) : (
