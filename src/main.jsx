@@ -652,6 +652,22 @@ function PolicyFooter() {
   );
 }
 
+function CommercialBox() {
+  return (
+    <section className="feedback-panel">
+      <h2>Free now · Premium tools later</h2>
+      <p>A1ZIV is currently free as an educational prototype. Premium teacher tools may be added later, such as advanced exports, saved worksheets, larger vocabulary banks, AI-powered generation and classroom management features.</p>
+      <div className="feature-grid">
+        <div><strong>Free educational prototype</strong><span>Use the current worksheet and test tools without payment.</span></div>
+        <div><strong>Premium features coming soon</strong><span>Future paid tools may include PDF export, saved materials and smarter generation.</span></div>
+        <div><strong>Collaboration</strong><span>Teachers, tutors and schools can contact us for ideas or partnership requests.</span></div>
+        <div><strong>Support this project</strong><span>Feedback and sharing help improve A1ZIV before monetisation.</span></div>
+      </div>
+      <p className="footer-small">For collaboration, partnership requests or support questions, contact: {CONTACT_EMAIL}</p>
+    </section>
+  );
+}
+
 function FeedbackBox() {
   const [rating, setRating] = useState(5);
   const [type, setType] = useState("Suggestion");
@@ -782,6 +798,7 @@ function App() {
         </section>
       </main>
 
+      <CommercialBox />
       <FeedbackBox />
       <PolicyFooter />
     </div>
