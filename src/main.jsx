@@ -4,6 +4,35 @@ import "./styles.css";
 
 const NL = String.fromCharCode(10);
 const CONTACT_EMAIL = "ksam54041@gmail.com";
+const LEARNED_WORDS_STORAGE_KEY = "a1ziv_learned_words_v1";
+
+function clampWordCount(value) {
+  const number = Number(value);
+  if (Number.isNaN(number)) return 10;
+  return Math.max(1, Math.min(100, Math.round(number)));
+}
+
+function normaliseWordKey(word) {
+  return String(word || "").trim().toLowerCase();
+}
+
+function loadLearnedWords() {
+  try {
+    const raw = window.localStorage.getItem(LEARNED_WORDS_STORAGE_KEY);
+    const parsed = raw ? JSON.parse(raw) : [];
+    return Array.isArray(parsed) ? parsed.filter(Boolean) : [];
+  } catch {
+    return [];
+  }
+}
+
+function saveLearnedWords(words) {
+  try {
+    window.localStorage.setItem(LEARNED_WORDS_STORAGE_KEY, JSON.stringify(words));
+  } catch {
+    // Local storage may be unavailable in some browsers. The site still works without archive persistence.
+  }
+}
 
 const LANGUAGES = [
   "Russian", "Kazakh", "Swedish", "German", "Spanish", "Italian", "Japanese", "Chinese", "Norwegian", "Portuguese", "Czech", "French", "Dutch"
@@ -334,17 +363,10 @@ function collectRawEntries(level, topic) {
 }
 
 function topicWords(level, topic, language) {
-  const levelData = BASE_WORDS[level] || BASE_WORDS.B1;
-  const raw = levelData[topic] || EXTRA_TOPICS[topic] || levelData["Everyday life"] || [];
-
-  if (LANGUAGE_INDEX[language]) {
-    return raw.map((entry) => parseEntry(entry, language)).filter(Boolean);
-  }
-
   const translated = collectRawEntries(level, topic)
     .map((entry) => parseEntry(entry, language))
     .filter(Boolean)
-    .filter((item) => item.meaning && item.meaning !== item.word);
+    .filter((item) => item.word && item.meaning && item.meaning !== item.word);
 
   return uniqueWords(translated);
 }
@@ -706,13 +728,27 @@ function App() {
   const [answers, setAnswers] = useState({});
   const [checked, setChecked] = useState(false);
   const [seed, setSeed] = useState(0);
+  const [hasGenerated, setHasGenerated] = useState(false);
+  const [learnedWords, setLearnedWords] = useState(() => loadLearnedWords());
+
+  const learnedSet = useMemo(() => new Set(learnedWords.map(normaliseWordKey)), [learnedWords]);
 
   const words = useMemo(() => {
-    if (manual) return uniqueWords(parseCustomWords(customText)).slice(0, count);
+    const safeCount = clampWordCount(count);
+    if (manual) return uniqueWords(parseCustomWords(customText)).slice(0, safeCount);
+    if (!hasGenerated) return [];
     const generated = uniqueWords(topicWords(level, topic, language));
-    const rotated = [...generated.slice(seed % Math.max(1, generated.length)), ...generated.slice(0, seed % Math.max(1, generated.length))];
-    return rotated.slice(0, count);
-  }, [manual, customText, level, topic, language, count, seed]);
+    const available = generated.filter((item) => !learnedSet.has(normaliseWordKey(item.word)));
+    const source = available.length ? available : generated;
+    const rotation = source.length ? seed % source.length : 0;
+    const rotated = [...source.slice(rotation), ...source.slice(0, rotation)];
+    return rotated.slice(0, safeCount);
+  }, [manual, customText, level, topic, language, count, seed, learnedSet, hasGenerated]);
+
+  const availableAutoWordsCount = useMemo(() => {
+    if (manual) return 0;
+    return uniqueWords(topicWords(level, topic, language)).filter((item) => !learnedSet.has(normaliseWordKey(item.word))).length;
+  }, [manual, level, topic, language, learnedSet]);
 
   const studentText = useMemo(() => buildMaterial({ words, title, level, topic, language, format, taskType, showAnswers: false }), [words, title, level, topic, language, format, taskType]);
   const teacherText = useMemo(() => buildMaterial({ words, title, level, topic, language, format, taskType, showAnswers: true }), [words, title, level, topic, language, format, taskType]);
@@ -734,12 +770,23 @@ function App() {
   }
 
   function startEditingCurrentWords() {
-    setCustomText(wordsToEditableText(words));
+    setCustomText(words.length ? wordsToEditableText(words) : "");
     setManual(true);
+    setHasGenerated(true);
   }
 
   function useAutomaticWords() {
     setManual(false);
+    setHasGenerated(true);
+    setSeed((s) => s + 1);
+  }
+
+  function generateWords() {
+    if (manual) {
+      setHasGenerated(true);
+      return;
+    }
+    setHasGenerated(true);
     setSeed((s) => s + 1);
   }
 
@@ -748,9 +795,25 @@ function App() {
     setChecked(false);
   }, [studentText]);
 
+  useEffect(() => {
+    saveLearnedWords(learnedWords);
+  }, [learnedWords]);
+
+  function markCurrentWordsAsLearned() {
+    if (!words.length) return;
+    const updated = Array.from(new Set([...learnedWords, ...words.map((item) => normaliseWordKey(item.word))])).filter(Boolean);
+    setLearnedWords(updated);
+    if (!manual) setSeed((s) => s + 1);
+  }
+
+  function clearLearnedArchive() {
+    setLearnedWords([]);
+    setSeed((s) => s + 1);
+  }
+
   return (
     <div className="app-shell">
-      <Hero onGenerateClick={() => setMode("worksheet")} onTestClick={() => setMode("test")} />
+      <Hero onGenerateClick={() => { setMode("worksheet"); generateWords(); }} onTestClick={() => { setMode("test"); generateWords(); }} />
 
       <section className="example-strip">
         <h2>Example outputs</h2>
@@ -767,18 +830,25 @@ function App() {
           </div>
           <div className="grid-2">
             <label>Translation language<select value={language} onChange={(e) => setLanguage(e.target.value)}>{LANGUAGES.map((x) => <option key={x}>{x}</option>)}</select></label>
-            <label>Number of words<select value={count} onChange={(e) => setCount(Number(e.target.value))}><option value="5">5</option><option value="8">8</option><option value="10">10</option><option value="12">12</option></select></label>
+            <label>Number of words<input type="number" min="1" max="100" value={count} onChange={(e) => setCount(clampWordCount(e.target.value))} /></label>
           </div>
           <label>Material format<select value={format} onChange={(e) => setFormat(e.target.value)}>{FORMATS.map((f) => <option key={f.value} value={f.value}>{f.label}</option>)}</select></label>
           <label>Exercise type<select value={taskType} onChange={(e) => setTaskType(e.target.value)}>{TASK_TYPES.map((t) => <option key={t.value} value={t.value}>{t.label}</option>)}</select></label>
-          <div className="button-row"><button onClick={() => { if (!manual) setSeed((s) => s + 1); }}>{manual ? "Update tasks from my words" : "Regenerate words"}</button><button className="secondary-button" onClick={manual ? useAutomaticWords : startEditingCurrentWords}>{manual ? "Use automatic words" : "Edit current words"}</button></div>
+          <div className="button-row"><button onClick={generateWords}>{manual ? "Update tasks from my words" : hasGenerated ? "Regenerate words" : "Generate words"}</button><button className="secondary-button" onClick={manual ? useAutomaticWords : startEditingCurrentWords}>{manual ? "Use automatic words" : "Edit current words"}</button></div>
+          {!manual && words.length > 0 && <div className="button-row"><button className="secondary-button" onClick={markCurrentWordsAsLearned}>Mark current words as learned</button><button className="secondary-button" onClick={clearLearnedArchive}>Clear learned archive</button></div>}
+          {!manual && (hasGenerated || learnedWords.length > 0) && <p className="footer-small">Learned archive: {learnedWords.length} word(s). These words will not appear again in automatic generation. Available new words for this selection: {availableAutoWordsCount}.</p>}
+          {!manual && learnedWords.length > 0 && <div className="word-preview"><h3>Learned words archive</h3>{learnedWords.slice(0, 40).map((word) => <span key={word}>{word}</span>)}{learnedWords.length > 40 && <span>+ {learnedWords.length - 40} more</span>}</div>}
+          {manual && <p className="footer-small">Manual words are not affected by the learned archive. Use automatic mode to avoid repeated learned words.</p>}
           {manual && <label>Edit words<textarea value={customText} onChange={(e) => setCustomText(e.target.value)} placeholder="word — translation\nstrategy — стратегия\nbudget — бюджет" /></label>}
-          {!manual && <div className="word-preview"><h3>Current words</h3>{words.map((w) => <span key={w.word}>{w.word} — {w.meaning}</span>)}</div>}
+          {!manual && words.length > 0 && <div className="word-preview"><h3>Current words</h3>{words.map((w) => <span key={w.word}>{w.word} — {w.meaning}</span>)}</div>}
+          {!manual && words.length === 0 && <div className="word-preview"><h3>No words generated yet</h3><span>Choose settings and click Generate words.</span></div>}
         </section>
 
         <section className="result-panel">
           <div className="tabs"><button className={mode === "worksheet" ? "active-tab" : "ghost-button"} onClick={() => setMode("worksheet")}>Generate worksheet</button><button className={mode === "test" ? "active-tab" : "ghost-button"} onClick={() => setMode("test")}>Generate test</button></div>
-          {mode === "worksheet" ? (
+          {words.length === 0 ? (
+            <div className="score-box"><strong>No material generated yet.</strong><p>Choose your level, topic, language and number of words, then click Generate words. This keeps the site clean for first-time visitors.</p></div>
+          ) : mode === "worksheet" ? (
             <>
               <h2>2. Student / Teacher versions</h2>
               <div className="grid-2"><button onClick={() => copyText(studentText)}>Copy Student Version</button><button onClick={() => copyText(teacherText)}>Copy Teacher Version</button></div>
