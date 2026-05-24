@@ -3,7 +3,7 @@ import { createRoot } from "react-dom/client";
 import "./styles.css";
 
 const NL = String.fromCharCode(10);
-const CONTACT_EMAIL = "ksam54041@gmai.com";
+const CONTACT_EMAIL = "ksam54041@gmail.com";
 
 const LANGUAGES = [
   "Russian", "Kazakh", "Swedish", "German", "Spanish", "Italian", "Japanese", "Chinese", "Norwegian", "Portuguese", "Czech", "French", "Dutch"
@@ -294,20 +294,43 @@ const WORD_SENTENCES = {
   deadline: "We must finish the report before the _____."
 };
 
+
+function translationForWord(word, language) {
+  if (LANGUAGE_INDEX[language]) return null;
+  const extraMap = EXTRA_LANGUAGE_TRANSLATIONS[language] || {};
+  const clean = String(word || "").trim();
+  return extraMap[clean] || extraMap[clean.toLowerCase()] || null;
+}
+
 function parseEntry(entry, language) {
   const parts = entry.split("|");
-  const word = parts[0] || "word";
+  const word = (parts[0] || "word").trim();
   const idx = LANGUAGE_INDEX[language];
 
   if (idx) {
     return { word, meaning: parts[idx] || parts[1] || word };
   }
 
-  const extraMap = EXTRA_LANGUAGE_TRANSLATIONS[language] || {};
-  const exact = extraMap[word];
-  const lower = extraMap[String(word).toLowerCase()];
+  const translated = translationForWord(word, language);
+  if (!translated) return null;
+  return { word, meaning: translated };
+}
 
-  return { word, meaning: exact || lower || parts[1] || word };
+function collectRawEntries(level, topic) {
+  const levelData = BASE_WORDS[level] || BASE_WORDS.B1;
+  const exactTopic = levelData[topic] || EXTRA_TOPICS[topic] || [];
+  const sameLevelAllTopics = Object.values(levelData).flat();
+  const extraTopic = EXTRA_TOPICS[topic] || [];
+  const allLevels = LEVELS.flatMap((lvl) => Object.values(BASE_WORDS[lvl] || {}).flat());
+  const allExtraTopics = Object.values(EXTRA_TOPICS).flat();
+
+  return [
+    ...exactTopic,
+    ...extraTopic,
+    ...sameLevelAllTopics,
+    ...allLevels,
+    ...allExtraTopics
+  ];
 }
 
 function topicWords(level, topic, language) {
@@ -315,23 +338,15 @@ function topicWords(level, topic, language) {
   const raw = levelData[topic] || EXTRA_TOPICS[topic] || levelData["Everyday life"] || [];
 
   if (LANGUAGE_INDEX[language]) {
-    return raw.map((entry) => parseEntry(entry, language));
+    return raw.map((entry) => parseEntry(entry, language)).filter(Boolean);
   }
 
-  const extraMap = EXTRA_LANGUAGE_TRANSLATIONS[language] || {};
-  const allRaw = [
-    ...raw,
-    ...(levelData["Everyday life"] || []),
-    ...(levelData.Business || []),
-    ...(levelData.Finance || []),
-    ...(EXTRA_TOPICS[topic] || [])
-  ];
-
-  const translated = allRaw
+  const translated = collectRawEntries(level, topic)
     .map((entry) => parseEntry(entry, language))
+    .filter(Boolean)
     .filter((item) => item.meaning && item.meaning !== item.word);
 
-  return uniqueWords(translated.length ? translated : raw.map((entry) => parseEntry(entry, "Russian")));
+  return uniqueWords(translated);
 }
 
 function uniqueWords(words) {
