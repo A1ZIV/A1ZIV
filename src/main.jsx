@@ -569,7 +569,7 @@ function header(title, level, topic, language, format) {
     `Format: ${FORMATS.find((f) => f.value === format)?.label || format}`,
     "",
     "Learning sequence:",
-    "1. Study the vocabulary list.",
+    "1. Study the word bank.",
     "2. Check meaning recognition.",
     "3. Practise the words in context.",
     "4. Use the words in speaking or writing.",
@@ -578,8 +578,19 @@ function header(title, level, topic, language, format) {
   ].join(NL);
 }
 
-function vocabularyList(words) {
-  return ["VOCABULARY LIST", "", ...words.map((item, i) => `${i + 1}. ${item.word} — ${item.meaning}`), ""].join(NL);
+function vocabularyList(words, showAnswers) {
+  if (showAnswers) {
+    return ["VOCABULARY LIST WITH TRANSLATIONS", "", ...words.map((item, i) => `${i + 1}. ${item.word} — ${item.meaning}`), ""].join(NL);
+  }
+
+  return [
+    "WORD BANK",
+    "",
+    ...words.map((item, i) => `${i + 1}. ${item.word}`),
+    "",
+    "Note for students: translations are hidden. Use context, clues and exercises to learn the words actively.",
+    ""
+  ].join(NL);
 }
 
 
@@ -593,13 +604,17 @@ function answerKey(words) {
 
 function matchTask(words, showAnswers) {
   const mixed = shuffle(words);
-  const lines = ["EXERCISE. Match the words with the meanings.", ""];
+  const lines = ["EXERCISE. Match the words with the English clues.", ""];
   words.forEach((item, i) => lines.push(`${i + 1}. ${item.word}`));
   lines.push("");
-  mixed.forEach((item, i) => lines.push(`${String.fromCharCode(65 + i)}. ${item.meaning}`));
+  mixed.forEach((item, i) => lines.push(`${String.fromCharCode(65 + i)}. ${clueFor(item)}`));
+
   if (showAnswers) {
     lines.push("", "Answer Key:");
-    words.forEach((item, i) => lines.push(`${i + 1}. ${String.fromCharCode(65 + mixed.findIndex((x) => x.word === item.word))}`));
+    words.forEach((item, i) => {
+      const letter = String.fromCharCode(65 + mixed.findIndex((x) => x.word === item.word));
+      lines.push(`${i + 1}. ${letter} — ${item.word} = ${item.meaning}`);
+    });
   }
   return lines.join(NL);
 }
@@ -880,7 +895,7 @@ function buildMainTask(words, taskType, level, topic, showAnswers) {
 
 
 function buildMaterial({ words, title, level, topic, language, format, taskType, showAnswers }) {
-  const intro = header(title, level, topic, language, format) + vocabularyList(words);
+  const intro = header(title, level, topic, language, format) + vocabularyList(words, showAnswers);
   let body = "";
   if (format === "reading") body = buildReading(words, level, topic, showAnswers);
   else if (format === "dialogue") body = buildDialogue(words, level, topic, taskType, showAnswers);
@@ -1180,13 +1195,14 @@ function App() {
               <div className="grid-2"><button onClick={() => copyText(studentText)}>Copy Student Version</button><button onClick={() => copyText(teacherText)}>Copy Teacher Version</button></div>
               <div className="grid-2"><button className="secondary-button" onClick={() => download(studentText, "student")}>Download Student</button><button className="secondary-button" onClick={() => download(teacherText, "teacher")}>Download Teacher</button></div>
               <div className="grid-2"><label>Download format<select value={downloadType} onChange={(e) => setDownloadType(e.target.value)}><option value="txt">TXT</option><option value="html">HTML</option><option value="word">Word (.doc)</option></select></label><button className="secondary-button" onClick={() => saveAs(teacherText, "teacher")}>Choose where to save / Save as...</button></div>
-              <pre>{teacherText}</pre>
+              <p className="footer-small">Preview shows the Student Version, so translations and answer keys are hidden. Download or copy the Teacher Version to see answers.</p>
+              <pre>{studentText}</pre>
             </>
           ) : (
             <>
               <h2>Interactive test</h2>
-              <p>Write the English word for each translation. Then check your score.</p>
-              {words.map((item, i) => <label key={item.word}>{i + 1}. {item.meaning}<input value={answers[i] || ""} onChange={(e) => setAnswers({ ...answers, [i]: e.target.value })} placeholder="Type English word" /></label>)}
+              <p>Write the English word for each English clue. Translations are hidden in the student test.</p>
+              {words.map((item, i) => <label key={item.word}>{i + 1}. {clueFor(item)}<input value={answers[i] || ""} onChange={(e) => setAnswers({ ...answers, [i]: e.target.value })} placeholder="Type English word" /></label>)}
               <button onClick={() => setChecked(true)}>Check my test</button>
               {checked && <div className="score-box"><strong>Score: {score} / {words.length}</strong><p>{score === words.length ? "Excellent work." : "Review the vocabulary list and try again."}</p></div>}
             </>
