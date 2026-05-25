@@ -533,20 +533,62 @@ function levelSentence(level, topic, words) {
   return `A sophisticated command of ${a} requires not only semantic accuracy, but also sensitivity to register, implication, and the way it interacts with terms such as ${b} and ${c}.`;
 }
 
-function clueFor(item) {
+function wordHash(value) {
+  return String(value || "").split("").reduce((sum, ch) => sum + ch.charCodeAt(0), 0);
+}
+
+function roughPartOfSpeech(word) {
+  const clean = String(word || "").toLowerCase().trim();
+  if (clean.includes(" ")) return "phrase";
+  if (/(tion|ment|ness|ity|ship|ance|ence|ism|ist|er|or)$/.test(clean)) return "noun";
+  if (/(ate|ise|ize|fy|en)$/.test(clean)) return "verb";
+  if (/(able|ible|ive|ous|ful|less|al|ic|ary|ent|ant)$/.test(clean)) return "adjective";
+  return "word";
+}
+
+function clueFor(item, level = "B1", topic = "Everyday life") {
   const key = String(item.word || "").toLowerCase().trim();
-  return WORD_CLUES[key] || `This word belongs to the vocabulary list. Choose the best option from the list.`;
+  if (WORD_CLUES[key]) return WORD_CLUES[key];
+
+  const part = roughPartOfSpeech(key);
+  const first = key.charAt(0).toUpperCase();
+  const scenario = scenarioFor(topic);
+  const advanced = level === "C1" || level === "C2";
+  const options = [
+    `A ${part} used when people discuss ${topic.toLowerCase()}; it starts with '${first}' and helps complete the idea accurately.`,
+    `A ${part} connected to ${scenario}; it is useful for giving a clearer explanation.`,
+    `A ${part} that can appear in a ${topic.toLowerCase()} text when someone explains a problem, result or important detail.`,
+    advanced
+      ? `A ${part} used to make an advanced answer more precise, especially in a ${topic.toLowerCase()} context.`
+      : `A ${part} used in a realistic ${topic.toLowerCase()} situation.`
+  ];
+  return options[wordHash(key) % options.length];
+}
+
+function contextStem(level, topic) {
+  const simple = level === "A1" || level === "A2";
+  const advanced = level === "C1" || level === "C2";
+  const topicMap = {
+    Business: simple ? "The worker talked about the _____." : advanced ? "The board discussion depended on a precise understanding of _____." : "The manager explained the importance of _____ during the meeting.",
+    Finance: simple ? "The bank worker explained the _____." : advanced ? "The report became more persuasive after the analyst clarified _____." : "The finance team reviewed _____ before making a decision.",
+    Environment: simple ? "The class talked about _____." : advanced ? "The article examined how _____ affects long-term environmental decisions." : "The community discussed _____ during the environmental project.",
+    Health: simple ? "The doctor talked about _____." : advanced ? "The speaker analysed the role of _____ in long-term health outcomes." : "The patient asked about _____ during the appointment.",
+    Technology: simple ? "The student used _____ online." : advanced ? "The team evaluated how _____ could affect the digital system." : "The developer explained _____ during the technology lesson.",
+    Travel: simple ? "At the airport, the traveller needed _____." : advanced ? "The travel plan changed because _____ created an unexpected problem." : "The traveller solved the problem by thinking about _____."
+  };
+  return topicMap[topic] || (simple ? "The student practised _____." : advanced ? `The text used _____ to express a more precise idea about ${topic.toLowerCase()}.` : `The speaker used _____ in a realistic ${topic.toLowerCase()} situation.`);
 }
 
 function gapSentenceFor(item, level, topic) {
   const key = String(item.word || "").toLowerCase().trim();
   if (WORD_SENTENCES[key]) return WORD_SENTENCES[key];
-  if (topic === "Finance") return `The finance team used this term in the report: _____.`;
-  if (topic === "Business") return `The manager used this term during the meeting: _____.`;
-  if (topic === "Technology") return `The speaker used this term to describe a digital idea: _____.`;
-  if (level === "A1" || level === "A2") return `Write the correct vocabulary word here: _____.`;
-  if (level === "C1" || level === "C2") return `Use the most precise vocabulary item to complete the idea: _____.`;
-  return `Complete the sentence with the correct vocabulary word: _____.`;
+  return contextStem(level, topic);
+}
+
+function exampleSentenceWithWord(item, level, topic) {
+  const sentence = gapSentenceFor(item, level, topic).replace("_____", item.word);
+  if (sentence.includes(item.word)) return sentence;
+  return sentenceFor(item.word, level, topic);
 }
 
 function sentenceFor(word, level, topic) {
@@ -587,8 +629,6 @@ function vocabularyList(words, showAnswers) {
     "WORD BANK",
     "",
     ...words.map((item, i) => `${i + 1}. ${item.word}`),
-    "",
-    "Note for students: translations are hidden. Use context, clues and exercises to learn the words actively.",
     ""
   ].join(NL);
 }
@@ -602,12 +642,12 @@ function answerKey(words) {
   return ["ANSWER KEY", "", ...words.map((item, i) => `${i + 1}. ${item.word} — ${item.meaning}`)].join(NL);
 }
 
-function matchTask(words, showAnswers) {
+function matchTask(words, showAnswers, level = "B1", topic = "Everyday life") {
   const mixed = shuffle(words);
   const lines = ["EXERCISE. Match the words with the English clues.", ""];
   words.forEach((item, i) => lines.push(`${i + 1}. ${item.word}`));
   lines.push("");
-  mixed.forEach((item, i) => lines.push(`${String.fromCharCode(65 + i)}. ${clueFor(item)}`));
+  mixed.forEach((item, i) => lines.push(`${String.fromCharCode(65 + i)}. ${clueFor(item, level, topic)}`));
 
   if (showAnswers) {
     lines.push("", "Answer Key:");
@@ -632,9 +672,10 @@ function mcqTask(words, level, topic, showAnswers) {
   const lines = ["EXERCISE. Choose the correct option.", ""];
   const answers = [];
   words.forEach((item, i) => {
-    const options = shuffle([item.word, ...shuffle(words.filter((x) => x.word !== item.word)).slice(0, 3).map((x) => x.word)]);
+    const distractors = shuffle(words.filter((x) => x.word !== item.word)).slice(0, 3).map((x) => x.word);
+    const options = shuffle([item.word, ...distractors]);
     answers.push(`${i + 1}. ${String.fromCharCode(65 + options.indexOf(item.word))} — ${item.word} = ${item.meaning}`);
-    lines.push(`${i + 1}. ${clueFor(item)}`);
+    lines.push(`${i + 1}. ${clueFor(item, level, topic)}`);
     options.forEach((op, idx) => lines.push(`${String.fromCharCode(65 + idx)}. ${op}`));
     lines.push("");
   });
@@ -642,52 +683,132 @@ function mcqTask(words, level, topic, showAnswers) {
   return lines.join(NL);
 }
 
-function translationTask(words, direction, showAnswers) {
-  const lines = [direction === "en" ? "EXERCISE. Translate into English." : "EXERCISE. Translate from English.", ""];
+function translationTask(words, direction, showAnswers, level = "B1", topic = "Everyday life") {
+  const lines = [direction === "en" ? "EXERCISE. Write the English word from the clue." : "EXERCISE. Translate from English into the selected language.", ""];
   words.forEach((item, i) => {
-    lines.push(direction === "en" ? `${i + 1}. ${item.meaning} — ______________________________` : `${i + 1}. ${item.word} — ______________________________`);
+    if (direction === "en") {
+      lines.push(`${i + 1}. ${clueFor(item, level, topic)} — ______________________________`);
+    } else {
+      lines.push(`${i + 1}. ${item.word} — ______________________________`);
+    }
   });
   if (showAnswers) lines.push("", "Answer Key:", ...words.map((item, i) => `${i + 1}. ${direction === "en" ? item.word : item.meaning}`));
   return lines.join(NL);
 }
 
-function otherTask(words, type, level, topic, showAnswers) {
-  const label = TASK_TYPES.find((t) => t.value === type)?.label || "Practice";
-  const lines = [`EXERCISE. ${label}.`, ""];
-  const selected = words.slice(0, Math.min(words.length, 12));
-
-  if (type === "definitions") {
-    selected.forEach((item, i) => lines.push(`${i + 1}. Explain '${item.word}' in English without translating it directly: ______________________________`));
-  } else if (type === "sentences") {
-    selected.forEach((item, i) => lines.push(`${i + 1}. Write a natural ${level}-level sentence with '${item.word}': ______________________________`));
-  } else if (type === "questions") {
-    selected.forEach((item, i) => lines.push(`${i + 1}. Answer the question using '${item.word}': How could this word be useful in ${topic.toLowerCase()}?`));
-  } else if (type === "collocations") {
-    selected.forEach((item, i) => lines.push(`${i + 1}. Write two natural collocations with '${item.word}', then write one example sentence.`));
-  } else if (type === "word_formation") {
-    selected.forEach((item, i) => lines.push(`${i + 1}. Create a related word form for '${item.word}' if possible, then use it in a sentence.`));
-  } else if (type === "odd") {
-    selected.forEach((item, i) => {
-      const second = selected[(i + 1) % selected.length]?.word || "word";
-      const third = selected[(i + 2) % selected.length]?.word || "term";
-      lines.push(`${i + 1}. ${item.word} / ${second} / ${third} / __________ — Add one word that does not belong and explain why.`);
-    });
-  } else if (type === "story") {
-    lines.push(`Write a ${level}-level mini story about ${scenarioFor(topic)}.`);
-    lines.push(`Use at least ${Math.min(8, words.length)} of these words: ${wordList(words, 12)}.`);
-    lines.push("Make the story logical: beginning → problem → solution → reflection.");
-  } else {
-    lines.push(`Mixed challenge about ${topic}:`);
-    lines.push(`1. Translate five words into the selected language.`);
-    lines.push(`2. Write five ${level}-level sentences.`);
-    lines.push(`3. Explain three words without using translation.`);
-    lines.push(`4. Use two words together in a short paragraph.`);
-  }
-
-  if (showAnswers) lines.push("", "Teacher note: open answers. Check meaning, natural usage, grammar control, and whether the answer matches the selected level.");
+function collocationTask(words, level, topic, showAnswers) {
+  const lines = ["EXERCISE. Choose the best collocation or phrase.", ""];
+  const answers = [];
+  words.slice(0, Math.min(words.length, 12)).forEach((item, i) => {
+    const part = roughPartOfSpeech(item.word);
+    const correct = part === "verb" ? `${item.word} effectively` : part === "adjective" ? `a ${item.word} approach` : `${item.word} strategy`;
+    const options = shuffle([correct, `do ${item.word}`, `make ${item.word}ly`, `very ${item.word}ness`]);
+    answers.push(`${i + 1}. ${String.fromCharCode(65 + options.indexOf(correct))} — ${correct}`);
+    lines.push(`${i + 1}. Choose the phrase that sounds most natural in a ${topic.toLowerCase()} context.`);
+    options.forEach((op, idx) => lines.push(`${String.fromCharCode(65 + idx)}. ${op}`));
+    lines.push("");
+  });
+  if (showAnswers) lines.push("Answer Key:", ...answers);
   return lines.join(NL);
 }
 
+function wordFormationTask(words, level, topic, showAnswers) {
+  const lines = ["EXERCISE. Complete the sentence with the correct vocabulary item from the word bank.", ""];
+  const selected = words.slice(0, Math.min(words.length, 12));
+  selected.forEach((item, i) => {
+    const stem = exampleSentenceWithWord(item, level, topic).replace(item.word, "_____");
+    lines.push(`${i + 1}. ${stem} (${item.word.toUpperCase()})`);
+  });
+  if (showAnswers) lines.push("", "Answer Key:", ...selected.map((item, i) => `${i + 1}. ${item.word} — ${item.meaning}`));
+  return lines.join(NL);
+}
+
+function sentenceBuildingTask(words, level, topic, showAnswers) {
+  const lines = ["EXERCISE. Sentence building.", ""];
+  words.slice(0, Math.min(words.length, 10)).forEach((item, i) => {
+    const sentence = exampleSentenceWithWord(item, level, topic);
+    const parts = sentence.replace(/[.?!]$/, "").split(" ");
+    const shuffled = shuffle(parts).join(" / ");
+    lines.push(`${i + 1}. Put the words in the correct order:`);
+    lines.push(shuffled);
+    lines.push("");
+  });
+  if (showAnswers) lines.push("Answer Key:", ...words.slice(0, Math.min(words.length, 10)).map((item, i) => `${i + 1}. ${exampleSentenceWithWord(item, level, topic)}`));
+  return lines.join(NL);
+}
+
+function definitionChoiceTask(words, level, topic, showAnswers) {
+  const lines = ["EXERCISE. Choose the word that matches each clue.", ""];
+  const selected = words.slice(0, Math.min(words.length, 12));
+  const answers = [];
+  selected.forEach((item, i) => {
+    const options = shuffle([item.word, ...shuffle(selected.filter((x) => x.word !== item.word)).slice(0, 3).map((x) => x.word)]);
+    answers.push(`${i + 1}. ${String.fromCharCode(65 + options.indexOf(item.word))} — ${item.word}`);
+    lines.push(`${i + 1}. ${clueFor(item, level, topic)}`);
+    options.forEach((op, idx) => lines.push(`${String.fromCharCode(65 + idx)}. ${op}`));
+    lines.push("");
+  });
+  if (showAnswers) lines.push("Answer Key:", ...answers);
+  return lines.join(NL);
+}
+
+function oddOneOutTask(words, level, topic, showAnswers) {
+  const selected = words.slice(0, Math.min(words.length, 12));
+  const lines = ["EXERCISE. Odd one out.", ""];
+  const answers = [];
+  for (let i = 0; i < selected.length; i += 3) {
+    const group = selected.slice(i, i + 3);
+    if (group.length < 3) break;
+    const extra = topic === "Finance" ? "sandwich" : topic === "Environment" ? "invoice" : "airport";
+    const options = shuffle([...group.map((x) => x.word), extra]);
+    answers.push(`${Math.floor(i / 3) + 1}. ${extra}`);
+    lines.push(`${Math.floor(i / 3) + 1}. Choose the word that does NOT fit the topic ${topic}.`);
+    lines.push(options.join(" / "));
+    lines.push("");
+  }
+  if (showAnswers) lines.push("Answer Key:", ...answers);
+  return lines.join(NL);
+}
+
+function otherTask(words, type, level, topic, showAnswers) {
+  const selected = words.slice(0, Math.min(words.length, 12));
+  if (!selected.length) return "No vocabulary generated yet.";
+
+  if (type === "definitions") return definitionChoiceTask(selected, level, topic, showAnswers);
+  if (type === "sentences") return sentenceBuildingTask(selected, level, topic, showAnswers);
+  if (type === "questions") {
+    const lines = ["EXERCISE. Guided speaking questions.", ""];
+    selected.slice(0, 10).forEach((item, i) => {
+      lines.push(`${i + 1}. Use '${item.word}' in your answer: What problem, solution or example can you connect with ${topic.toLowerCase()}?`);
+      lines.push("Answer: ________________________________________________");
+      lines.push("");
+    });
+    if (showAnswers) lines.push("Teacher note: check whether each answer uses the target word accurately and naturally.");
+    return lines.join(NL);
+  }
+  if (type === "collocations") return collocationTask(selected, level, topic, showAnswers);
+  if (type === "word_formation") return wordFormationTask(selected, level, topic, showAnswers);
+  if (type === "odd") return oddOneOutTask(selected, level, topic, showAnswers);
+  if (type === "story") {
+    const storyWords = selected.slice(0, Math.min(8, selected.length));
+    const lines = ["EXERCISE. Complete the mini story with words from the word bank.", ""];
+    lines.push(`A ${level}-level story about ${scenarioFor(topic)}:`);
+    lines.push("");
+    storyWords.forEach((item, i) => {
+      lines.push(`${i + 1}. ${gapSentenceFor(item, level, topic)}`);
+    });
+    lines.push("", "After completing the gaps, put the sentences into a logical order: beginning → problem → solution → result.");
+    if (showAnswers) lines.push("", "Answer Key:", ...storyWords.map((item, i) => `${i + 1}. ${item.word} — ${item.meaning}`));
+    return lines.join(NL);
+  }
+
+  return [
+    "EXERCISE. Mixed challenge.", "",
+    "PART A. Meaning recognition", definitionChoiceTask(selected.slice(0, 5), level, topic, showAnswers), "",
+    "PART B. Context practice", gapTask(selected.slice(0, 5), level, topic, showAnswers), "",
+    "PART C. Sentence order", sentenceBuildingTask(selected.slice(0, 5), level, topic, showAnswers)
+  ].join(NL);
+}
 
 function buildReading(words, level, topic, showAnswers) {
   const profile = profileFor(level);
@@ -861,29 +982,31 @@ function buildWriting(words, level, topic, showAnswers) {
 
 
 function buildUseOfEnglish(words, level, topic, showAnswers) {
-  const selected = words.slice(0, Math.min(10, words.length));
+  const selected = words.slice(0, Math.min(12, words.length));
   return [
     "USE OF ENGLISH", "",
     `Level: ${level}`,
     `Topic: ${topic}`, "",
-    "PART 1. Word formation", otherTask(selected.slice(0, 5), "word_formation", level, topic, showAnswers), "",
-    "PART 2. Collocations", otherTask(selected.slice(0, 5), "collocations", level, topic, showAnswers), "",
-    "PART 3. Meaning in context", mcqTask(selected.slice(0, 8), level, topic, showAnswers), "",
-    level === "C1" || level === "C2" ? "PART 4. Register shift\nRewrite three sentences in a more formal, precise style using target vocabulary." : "PART 4. Sentence building\nWrite five original sentences with target vocabulary."
+    "PART 1. Word choice in context", gapTask(selected.slice(0, 8), level, topic, showAnswers), "",
+    "PART 2. Collocations and natural phrasing", collocationTask(selected.slice(0, 8), level, topic, showAnswers), "",
+    "PART 3. Meaning in context", definitionChoiceTask(selected.slice(0, 8), level, topic, showAnswers), "",
+    "PART 4. Sentence transformation", sentenceBuildingTask(selected.slice(0, 6), level, topic, showAnswers), "",
+    level === "C1" || level === "C2"
+      ? "PART 5. Register control\nRewrite the completed sentences in a more formal, precise style. Keep the original meaning."
+      : "PART 5. Controlled production\nChoose three completed sentences and extend each one with a reason or example."
   ].join(NL);
 }
 
-
 function buildMainTask(words, taskType, level, topic, showAnswers) {
   if (!words.length) return "No vocabulary generated yet.";
-  if (taskType === "match") return matchTask(words, showAnswers);
+  if (taskType === "match") return matchTask(words, showAnswers, level, topic);
   if (taskType === "gap") return gapTask(words, level, topic, showAnswers);
   if (taskType === "mcq") return mcqTask(words, level, topic, showAnswers);
-  if (taskType === "translation_en") return translationTask(words, "en", showAnswers);
-  if (taskType === "translation_target") return translationTask(words, "target", showAnswers);
+  if (taskType === "translation_en") return translationTask(words, "en", showAnswers, level, topic);
+  if (taskType === "translation_target") return translationTask(words, "target", showAnswers, level, topic);
   if (taskType === "full") {
     return [
-      "PART 1. Meaning recognition", matchTask(words.slice(0, Math.min(12, words.length)), showAnswers), "",
+      "PART 1. Meaning recognition", matchTask(words.slice(0, Math.min(12, words.length)), showAnswers, level, topic), "",
       "PART 2. Context practice", gapTask(words.slice(0, Math.min(12, words.length)), level, topic, showAnswers), "",
       "PART 3. Choice and deduction", mcqTask(words.slice(0, Math.min(10, words.length)), level, topic, showAnswers), "",
       "PART 4. Active production", otherTask(words.slice(0, Math.min(10, words.length)), "sentences", level, topic, showAnswers), "",
